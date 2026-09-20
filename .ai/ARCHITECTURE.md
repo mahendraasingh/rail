@@ -27,11 +27,12 @@ graph TD
 ## Directory Structure
 
 - `frontend/`:
-  - `src/components/`: Reusable UI elements (`Navbar`, `Sidebar`, `Button`, `Card`, `Badge`, `Modal`, `EmptyState`, `LoadingSpinner`) and domain visualizers (`SeatMap`, `SeatCard`, `PassengerCard`, `MatchCard`, `SwapRequestCard`, `JourneySummary`).
-  - `src/pages/`: Route page containers (`Landing`, `Login`, `Register`, `Dashboard`, `CreateJourney`, `JourneyDetails`, `SeatMapPage`, `Recommendations`, `SwapRequests`, `Notifications`, `Profile`).
-  - `src/services/`: Client-side Axios API modules (`api.js`, `authService.js`, `journeyService.js`, `passengerService.js`, `swapService.js`).
-  - `src/context/` & `src/hooks/`: React context (`AuthContext.jsx`) and custom hooks (`useAuth.js`).
-  - `src/utils/`: Formatting helpers, berth code determination, and app constants.
+  - `src/components/`: Primitives (`Navbar` with journey selector, `Button`, `Card`/`SectionLabel`, `Badge`, `Modal`, `EmptyState`, `LoadingSpinner`, `LoadingScreen` boot, `PageTransition`, `Footer`) and railway visualizers (`CoachViz` animated bay strip, `SeatMap`, `SeatCard`, `GroupTicket`, `RouteMap`, `MatchCard`, `SwapRequestCard`, `JourneySummary`, `HeroScene`/`HeroScene3D` Three.js hero).
+  - `src/pages/`: `Landing` (3D hero + How-It-Works), `Login`, `Register`, `Dashboard`, `Groups`, `GroupDetail`, `Matches` (also `/journey/:id/recommendations`), `Requests`, `JourneyDetails`, `SeatMapPage`, `CreateJourney`, `Notifications`, `Profile`.
+  - `src/lib/motion.jsx`: lazy GSAP/Three loaders + reveal hooks (reduced-motion aware).
+  - `src/context/`: `AuthContext.jsx` (JWT session) + `JourneyContext.jsx` (active journey for navbar selector, localStorage-persisted).
+  - `src/services/`: Axios API modules (`api.js`, `authService.js`, `journeyService.js`, `passengerService.js`, `swapService.js`).
+  - `src/utils/`: `formatters.js`, `seatUtils.js`, `groupUtils.js` (API-shape contract helpers: extractGroups, buildSeatClusters, getSeparatedSeatNumbers), `constants.js` (RailSaathi copy, disclaimers, product rules).
 - `backend/`:
   - `config/`: MongoDB connection setup (`db.js`).
   - `controllers/`: HTTP request handlers for auth, journeys, passengers, and swaps.
@@ -130,4 +131,6 @@ React UI updates status badge & redirects to `/swaps`
 
 ## External Services
 - No external private or proprietary railway APIs are used.
-- Google Fonts (`Plus Jakarta Sans`) loaded via CDN.
+- Google Fonts CDN: Fraunces, Inter, IBM Plex Mono.
+- Frontend animation/3D: `gsap` (lazy via `lib/motion.jsx`), `three` (lazy chunk, landing hero only,
+  DPR-capped, full disposal, SVG fallback for mobile/reduced-motion/no-WebGL).

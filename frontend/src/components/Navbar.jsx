@@ -11,6 +11,7 @@ import {
   LogOut,
   Menu,
   X,
+  ListChecks,
 } from 'lucide-react';
 import clsx from 'clsx';
 
@@ -20,6 +21,7 @@ export const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navLinks = [
+    { label: 'All Journeys', path: '/journeys', icon: ListChecks },
     { label: 'New Journey', path: '/journey/create', icon: PlusCircle },
     { label: 'Exchange Requests', path: '/swaps', icon: ArrowLeftRight },
     { label: 'Notifications', path: '/notifications', icon: Bell },

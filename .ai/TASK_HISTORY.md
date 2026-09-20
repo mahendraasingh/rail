@@ -1,5 +1,24 @@
 # Task History
 
+## 2026-09-21 — Journey Entry Split
+- User wanted two separate things: (1) a form-only Create Journey flow, (2) a browsable train list. Added `pages/Journeys.jsx` + `/journeys` route, split Navbar links (My Journeys / New Journey), added Dashboard "Browse All Journeys" button. Build verified. Also corrected stale memory: `pages/Recommendations.jsx` still exists and is routed.
+
+## Premium Frontend Redesign (RailSaathi Railway Design System)
+- **Task**: Upgrade the entire frontend experience — premium railway palette (no blue SaaS), GSAP
+  micro-interactions, restrained Three.js landing hero, new Dashboard/Groups/Matches/Requests IA —
+  without breaking functionality or replacing API data with fake data.
+- **Outcome**: Full redesign shipped. Design tokens in `tailwind.config.js` (ivory/ink/crimson/
+  saffron/steel + `rail` alias); Fraunces/Inter/IBM Plex Mono fonts; `.paper-texture`/`.ink-band`/
+  `.metallic-rule`/`.perforation`/`.platform-label` CSS motifs; `lib/motion.jsx` (GSAP hooks with
+  reduced-motion); `JourneyContext`; LoadingScreen boot; PageTransition; Footer; shrink-on-scroll
+  Navbar with journey selector; CoachViz (animated split-cluster lines); GroupTicket; RouteMap;
+  redesigned MatchCard/SwapRequestCard (animated status lines); split-screen consent modal in
+  Matches. New pages Groups/GroupDetail/Matches/Requests; rebuilt Landing (Three.js hero +
+  How-It-Works + product rules) and Dashboard. Deleted Recommendations.jsx/Sidebar.jsx/
+  PassengerCard.jsx. Fixed against real API shapes via `utils/groupUtils.js` (detail endpoint has
+  no `seatMapData`; per-group entries at `groupSplitInfo.perGroup[]`). Verified: vite build passes,
+  backend healthy, 180 dataset journeys, seat map healthy (62/4/4/2), all routes wired.
+
 ## Per-Group Split Analysis & Green-Dominant Seat Maps
 - **Task**: User reported seat maps showing only 1-2 green rows with the rest red, and zero green swap recommendations; asked to retune the dataset (more together-groups, more willing-to-exchange passengers) and make results visible on the frontend.
 - **Root cause**: (a) All analysis call sites passed every group into `analyzeGroupSplit` as one blob — the entire coach was treated as a single group, so only the dominant bay stayed green. (b) The matcher only accepted solo travellers as swap targets; solos are rare, so recommendations were ~0. (c) Amber markers only rendered on empty seats, but swap targets are occupied.

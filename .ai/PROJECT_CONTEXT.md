@@ -7,11 +7,12 @@
 RailTogether is an assistive voluntary railway seat-exchange coordinator designed to solve the seat-splitting problem for groups, families, and senior citizens travelling together on Indian Railways. When group members are assigned seats across different bays or coaches, RailTogether detects the separation, visualizes the coach layout, calculates deterministic compatibility scores with fellow solo passengers, and facilitates human-consent-based voluntary seat swaps without modifying official railway reservation systems.
 
 ## Current Tech Stack
-- **Frontend**: React 18.3.1, Vite 6.0.11, Tailwind CSS 3.4.17, React Router DOM 6.28.2, Axios 1.7.9, Lucide React 0.474.0, clsx 2.1.1
+- **Frontend**: React 18.3.1, Vite 6.0.11, Tailwind CSS 3.4.17, React Router DOM 6.28.2, Axios 1.7.9, Lucide React 0.474.0, clsx 2.1.1, **GSAP** (animations via `lib/motion.jsx`), **Three.js** (lazy landing hero only)
 - **Backend**: Node.js (v24 compatible), Express.js 4.21.2, Mongoose 8.9.5, jsonwebtoken 9.0.2, bcryptjs 2.4.3, cors 2.8.5, dotenv 16.4.7
 - **Database**: MongoDB with Mongoose ODM (includes an automated in-memory store fallback when MongoDB is not connected)
 - **Authentication**: JWT Bearer token authentication (1-Click Hackathon Demo mode removed)
-- **Styling**: Tailwind CSS with custom railway design tokens, Plus Jakarta Sans typography, and custom micro-animations
+- **Styling**: Tailwind CSS with the RailSaathi railway design system — warm ivory/cream backgrounds, graphite `ink` text, `crimson` railway-red primary, `saffron` gold secondary, `steel` supporting (NO blue SaaS palette); legacy `rail.*` classes alias to crimson. Fonts: Fraunces (display), Inter (body), IBM Plex Mono (seat/PNR numerals). Signature CSS motifs: `.paper-texture`, `.ink-band`, `.metallic-rule`, `.perforation`, `.platform-label`.
+- **Brand**: **RailSaathi** — "Booked Together. Sit Together." Primary navigation: Dashboard / Groups / Matches / Requests.
 - **Architecture**: Decoupled Client-Server Monorepo (`frontend/`, `backend/`, root orchestrator)
 
 ## Existing Features
@@ -48,8 +49,9 @@ RailTogether is an assistive voluntary railway seat-exchange coordinator designe
 
 ## Important Folders
 
-- [`frontend/src/components/`](file:///d:/rail/frontend/src/components/): Reusable UI primitives and domain widgets (`SeatMap`, `MatchCard`, `SwapRequestCard`, `JourneySummary`, `Modal`, `Navbar`).
-- [`frontend/src/pages/`](file:///d:/rail/frontend/src/pages/): Route views (`Landing`, `Dashboard`, `CreateJourney`, `JourneyDetails`, `SeatMapPage`, `Recommendations`, `SwapRequests`, `Notifications`, `Profile`).
+- [`frontend/src/components/`](file:///d:/rail/frontend/src/components/): Primitives (`Navbar`, `Button`, `Card`/`SectionLabel`, `Badge`, `Modal`, `LoadingScreen`, `PageTransition`, `Footer`) and railway widgets (`CoachViz`, `SeatMap`, `GroupTicket`, `RouteMap`, `MatchCard`, `SwapRequestCard`, `JourneySummary`, `HeroScene`/`HeroScene3D`).
+- [`frontend/src/pages/`](file:///d:/rail/frontend/src/pages/): Route views (`Landing`, `Login`, `Register`, `Dashboard`, `Groups`, `GroupDetail`, `Matches`, `Requests`, `JourneyDetails`, `SeatMapPage`, `CreateJourney`, `Notifications`, `Profile`).
+- [`frontend/src/utils/groupUtils.js`](file:///d:/rail/frontend/src/utils/groupUtils.js): shared API-shape contract helpers (extractGroups, buildSeatClusters, getSeparatedSeatNumbers) — journey detail has NO `seatMapData` (call `getSeatMap` separately); per-group entries live at `groupSplitInfo.perGroup[]`.
 - [`backend/models/`](file:///d:/rail/backend/models/): Mongoose schemas (`User`, `Journey`, `Passenger`, `SwapRequest`).
 - [`backend/dataset/uploads/`](file:///d:/rail/backend/dataset/uploads/): Upload directory for synthetic railway datasets.
 
@@ -61,3 +63,5 @@ RailTogether is an assistive voluntary railway seat-exchange coordinator designe
 4. **No Demo Mode**: All 1-Click demo entry points (UI buttons, `/api/journeys/demo-seed`, `/api/auth/demo`) were removed by user request. Do not reintroduce them.
 5. **Mixed/String IDs**: `_id` and reference fields on `Journey`/`Passenger`/`SwapRequest` are `Mixed` (dataset uses string IDs like `J000001`); never cast these paths to `ObjectId`, and guard `findById` with `ObjectId.isValid`.
 6. **Per-Group Analysis & Dataset Tuning**: Split analysis is always per `groupId` — never feed multiple groups into single-group `analyzeGroupSplit`. Dataset targets: ~80% GROUP_TOGETHER bookings, ~80% `willing_to_exchange`; seat maps are green-dominant with amber best-target markers.
+7. **Premium Railway Design System**: UI stays on the ivory/ink/crimson/saffron/steel palette — never reintroduce blue/generic SaaS styling or the old `rail`-blue values. GSAP hooks in `lib/motion.jsx` must keep `prefers-reduced-motion` support; Three.js stays confined to the landing hero (lazy, DPR-capped, disposed, SVG fallback).
+8. **Superseded Components Deleted**: `pages/Recommendations.jsx`, `components/Sidebar.jsx`, `components/PassengerCard.jsx` were removed — Matches/JourneyDetails/GroupDetail cover their roles. Do not re-import them.

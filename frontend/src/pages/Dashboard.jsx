@@ -86,6 +86,11 @@ export const Dashboard = () => {
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
+          <Link to="/journeys">
+            <Button variant="outline" size="md" icon={Layers} className="font-bold bg-white/10 border-white/20 text-white hover:bg-white/20 hover:border-white/30">
+              Browse All Journeys
+            </Button>
+          </Link>
           <Link to="/journey/create">
             <Button variant="primary" size="md" icon={PlusCircle} className="font-bold shadow-md">
               Create New Journey

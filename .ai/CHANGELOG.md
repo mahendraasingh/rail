@@ -1,5 +1,32 @@
 # Changelog
 
+## Journey Entry Split — /journeys List Page
+- Split journey access into two separate entries per user request: **My Journeys** (new `/journeys` route, `pages/Journeys.jsx`) shows ALL trains as ticket-style cards with search (train/station/PNR) and View Journey / Find Matches / Seat Map actions; **New Journey** (`/journey/create`) keeps the full train + passengers form.
+- Navbar now has My Journeys (ListChecks icon) + New Journey entries; Dashboard welcome banner got a "Browse All Journeys" button beside "Create New Journey".
+- Verified: `vite build` passes; `/journeys` serves 200.
+
+## Premium Frontend Redesign — RailSaathi (Railway Design System, GSAP + Three.js)
+- Rebranded UI to **RailSaathi** ("Booked Together. Sit Together.") with a warm railway palette
+  (ivory/ink/crimson/saffron/steel — replaces blue SaaS) in `tailwind.config.js`; legacy `rail.*`
+  classes aliased to crimson. Fonts: Fraunces/Inter/IBM Plex Mono.
+- Added `gsap` + `three`; new `lib/motion.jsx` (useGsap/useReveal/useScrollReveal/loadThree with
+  reduced-motion support), `context/JourneyContext.jsx` (navbar journey selector), `PageTransition`,
+  premium `LoadingScreen` boot sequence, `Footer`.
+- New pages: **Groups** (ticket cards + filters), **GroupDetail** (timeline + CoachViz + coordination
+  panel), **Matches** (split-screen comparison modal + consent flow; serves `/matches` AND
+  `/journey/:id/recommendations`), **Requests** (animated status route lines). Landing rebuilt with
+  Three.js hero (lazy, DPR-capped, full GPU disposal, SVG fallback) + 5-station How-It-Works +
+  product rules. Dashboard rebuilt (hero, live stat cards, CoachViz, group status ticket).
+- New components: `CoachViz` (bay strip with GSAP cluster connection lines), `GroupTicket`,
+  `RouteMap` (dark mode), `HeroScene`/`HeroScene3D`; restyled primitives + `SeatMap`/`SeatCard`/
+  `MatchCard`/`SwapRequestCard`/`JourneySummary`/`Navbar` (shrink-on-scroll + journey selector).
+- Added shared API-shape helpers `utils/groupUtils.js` (`extractGroups`, `buildSeatClusters`,
+  `getSeparatedSeatNumbers`) after discovering detail endpoint has no `seatMapData` and per-group
+  data lives at `groupSplitInfo.perGroup[]`.
+- Deleted superseded `pages/Recommendations.jsx`, `components/Sidebar.jsx`, `components/PassengerCard.jsx`.
+- Verified: production build passes (three.js lazy chunk), backend 200, frontend 200, seat map
+  categories healthy (62 GROUP / 4 RECOMMENDED / 4 SEPARATED / 2 OTHER on J000001).
+
 ## Per-Group Split Analysis, Matcher Overhaul & Dataset Retune
 - Fixed seat maps showing almost everyone red: `analyzeGroupSplit` was fed ALL groups at once (treating the whole coach as one giant group, so only the dominant bay stayed green). Added `analyzeGroupSplits` (per-group analysis, aggregate result) in `seatUtils.js`; `seatService.js` and `journeyController.js` now use it.
 - Fixed zero recommendations: the matcher only accepted SOLO travellers as swap targets (rare in dataset). `matchingService.js` rewritten: per-group cluster bays, candidates = solo travellers + willing members of OTHER groups (never own group, never already-separated members, `isAvailableForSwap !== false`).

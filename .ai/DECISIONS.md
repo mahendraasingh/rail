@@ -1,5 +1,50 @@
 # Technical Decisions
 
+## [Frontend] - Railway Premium Design System + GSAP/Three.js (Upgrade, Not Rebuild)
+
+### Decision
+Restyled the existing React app in place (kept all pages, services, AuthContext, API wiring) rather
+than rebuilding. Palette: warm ivory/cream backgrounds, deep graphite `ink` text, deep railway red
+`crimson` primary, muted `saffron` gold secondary, `steel` supporting — no blue. Legacy `rail.*`
+classes alias to crimson so old markup can never render blue. Fraunces (display) + Inter (body) +
+IBM Plex Mono (seat/PNR numerals). GSAP is lazy-loaded through `lib/motion.jsx` hooks that all
+respect `prefers-reduced-motion`; Three.js powers only the landing hero (lazy chunk, devicePixelRatio
+cap 1.75, full geometry/material disposal, SVG fallback for mobile/reduced-motion/no-WebGL).
+
+### Evidence
+[`frontend/tailwind.config.js`](file:///d:/rail/frontend/tailwind.config.js),
+[`frontend/src/lib/motion.jsx`](file:///d:/rail/frontend/src/lib/motion.jsx),
+[`frontend/src/components/HeroScene3D.jsx`](file:///d:/rail/frontend/src/components/HeroScene3D.jsx),
+[`frontend/src/components/CoachViz.jsx`](file:///d:/rail/frontend/src/components/CoachViz.jsx).
+
+### Impact
+All backend connections preserved (Dashboard stats, matches, swaps, dataset all read live API data;
+no fake frontend data). New IA = Dashboard / Groups / Matches / Requests; Matches also serves
+`/journey/:id/recommendations`. Old Recommendations.jsx/Sidebar.jsx/PassengerCard.jsx deleted.
+Three.js ships as a separate lazy chunk (747 kB min / 192 kB gzip) loaded only on desktop landing.
+
+---
+
+## [Frontend] - Centralized API-Shape Helpers (groupUtils.js)
+
+### Decision
+Group/split rendering is derived from the real API shapes through one module:
+`extractGroups(detail)`, `getPerGroupSplitInfos`, `findGroupSplitInfo`, `getSeparatedSeatNumbers`,
+`buildSeatClusters`. Established contract: journey detail does NOT include seat map data (call
+`getSeatMap` separately); per-group split entries live at `groupSplitInfo.perGroup[]` with
+`{ groupId, isSplit, separatedPassengerIds[], clusterBay, ... }`.
+
+### Evidence
+[`frontend/src/utils/groupUtils.js`](file:///d:/rail/frontend/src/utils/groupUtils.js), verified
+against live `GET /api/journeys/:id` and `/seatmap` payloads.
+
+### Impact
+Dashboard/Groups/GroupDetail/JourneyDetails share one source of truth for group derivation and
+cluster visualization instead of four divergent inline implementations (two of which referenced
+fields that don't exist in the API).
+
+---
+
 ## [Matching] - Per-Group Split Analysis + Group Members as Valid Swap Targets
 
 ### Decision

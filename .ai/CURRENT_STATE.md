@@ -1,71 +1,74 @@
 # Current State
 
 ## Overall Status
-**Fully Functional Full-Stack MVP (Active & Running on Localhost)**.
+**Premium Redesigned Full-Stack App (Active & Running on Localhost)**
 - **Frontend**: `http://localhost:5173/` (Vite) — source in `frontend/`
 - **Backend API**: `http://localhost:5000/` (Express.js, connected to MongoDB) — source in `backend/`
 
-## Already Implemented
+## Design System (Railway Premium — NO blue SaaS)
+- **Palette** (`frontend/tailwind.config.js`): `ivory`/`cream` backgrounds, `ink` (deep graphite) text,
+  `crimson` (deep railway red) primary accent, `saffron` (muted gold) secondary, `steel` supporting,
+  `line` hairline borders. Legacy `rail.*` classes aliased to crimson so no stale class renders blue.
+- **Typography**: Fraunces (display serif, `font-display`), Inter (body), IBM Plex Mono (`font-mono`
+  for seat numbers / PNRs / ticket serials). Loaded in `frontend/index.html`.
+- **Signature CSS** (`frontend/src/index.css`): `.paper-texture`, `.ink-band`, `.metallic-rule`,
+  `.perforation`, `.ticket-edge`, `.platform-label` (station-style overline).
+- **Brand**: **RailSaathi** — "BOOKED TOGETHER. SIT TOGETHER."
 
-- **Authentication & User Profiles**:
-  - Registration (`POST /api/auth/register`) with bcrypt password hashing.
-  - Login (`POST /api/auth/login`) with JWT token generation and storage.
-  - Profile endpoint (`GET /api/auth/me`) and Profile diagnostic view (`/profile`).
-  - (1-Click demo login/`/api/auth/demo` has been removed.)
+## Frontend Architecture
+- **New deps**: `gsap` (animations), `three` (3D hero). Both lazy-loaded via `frontend/src/lib/motion.jsx`
+  (useGsap / useReveal / useScrollReveal / loadThree, all respect `prefers-reduced-motion`).
+- **Contexts**: `AuthContext` (auth) + `JourneyContext` (`context/JourneyContext.jsx` — active journey
+  for the navbar selector, persists to localStorage `railsaathi_journey`).
+- **App shell** (`App.jsx`): LoadingScreen boot sequence → Navbar → `PageTransition` wrapped routes →
+  Footer. Route guard redirects by token presence (`railtogether_token`). `/swaps` redirects to `/requests`.
+- **Navbar**: shrink-on-scroll (h-16→h-14, blur, hairline border), links = Dashboard/Groups/Matches/Requests,
+  right side = journey selector (`NDLS → MMCT` codes) + profile/logout.
 
-- **Journey & Group Passenger Management**:
-  - Journey creation (`POST /api/journeys`) with route and coach attributes.
-  - Dynamic passenger list addition with automatic berth determination (`Lower`, `Middle`, `Upper`, `Side Lower`, `Side Upper`).
-  - Journey details view (`/journey/:id`) with group split status banners.
-  - (Demo journey seeding `/api/journeys/demo-seed` has been removed.)
+## Pages (all live)
+| Route | Page | Notes |
+|---|---|---|
+| `/` | Landing | Three.js hero (`HeroScene3D.jsx`: track, train, fog, scroll response, DPR-capped, full disposal) with SVG fallback on mobile/reduced-motion/no-WebGL; How-It-Works 5-station timeline (Detect→Match→Request→Confirm→Coordinate); product rules grid |
+| `/dashboard` | Dashboard | Hero "YOUR JOURNEY, COORDINATED.", 4 live stat cards (Groups/Separated/Matches/Requests from API), CoachViz, group status ticket (View Coach + Find Match), journey grid with mini RouteMap |
+| `/journeys` | Journeys | Dedicated browsable train list (search by train/station/PNR, ticket cards → View Journey / Find Matches / Seat Map); separate from Create Journey form |
+| `/groups` | Groups | All groups as railway-ticket cards (perforation, serials, TOGETHER/SEPARATED stub) with ALL/SEPARATED/TOGETHER filters |
+| `/groups/:groupId` | GroupDetail | Ticket header, route timeline, CoachViz with cluster lines, passengers list, coordination panel (matches count, View Matches) |
+| `/matches` + `/journey/:id/recommendations` | Matches | "POTENTIAL MATCHES" cards (score, why-this-match checklist, Send Request); split-screen comparison modal (Your Group ⇄ Potential Passenger + POTENTIAL EXCHANGE marker) → "Request Passenger Consent" |
+| `/requests` | Requests | Received/Sent tabs; SwapRequestCard with animated route-line states (PENDING=shuttle dot, ACCEPTED=fill sweep, REJECTED=fade, CANCELLED=retract) |
+| `/journey/:id` | JourneyDetails | JourneySummary (ink band + dark RouteMap), action rail, CoachViz, coordination panel, group member rows |
+| `/journey/:id/seats` | SeatMapPage | Full SeatMap + inspector drawer + top matches + consent modal |
+| `/login`, `/register` | Auth | Split editorial layout (ink side panel + form column) |
+| `/journey/create`, `/notifications`, `/profile` | Utility | Restyled to ivory/ticket system |
 
-- **Seat Map & Visualization**:
-  - 72-berth 3AC/Sleeper coach model divided into 9 compartment bays.
-  - Color-coded categories: Group Member (Emerald), Separated Member (Rose), Recommended Swap (Amber), Other (Slate), Empty (Dashed).
-  - Split analysis is PER GROUP (`analyzeGroupSplits` in `seatUtils.js`): each group clusters around its own bay, so members of one group never mark members of another group as separated. Result: green-dominant seat maps (~57-65 green, 1-11 red per coach).
-  - Amber RECOMMENDED markers appear on the BEST target seat per separated passenger (occupied seats included — the occupant is the swap opportunity); red separated seats keep their color.
-  - Selected seat inspection drawer and direct swap request trigger from map.
+## Key Components
+- `CoachViz.jsx` — linear bay strip with GSAP-animated SVG connection lines between separated seat
+  clusters of the focused group; seat states focus/separated/match/selected/idle.
+- `GroupTicket.jsx` — ticket (full) and mini (list row) variants; fake serial `RS-0001` is decorative.
+- `RouteMap.jsx` — route line with `dark` tone prop for use on ink surfaces.
+- `MatchCard.jsx`, `SwapRequestCard.jsx` — redesigned (compat checklist; animated status line).
+- Primitives restyled: Button, Card(+SectionLabel), Badge, Modal, LoadingSpinner, EmptyState.
 
-- **Deterministic Matching Engine**:
-  - PER-GROUP cluster bay identification: a passenger is "separated" only relative to their own group's bay.
-  - Swap candidates = solo travellers AND willing members of OTHER groups (`isAvailableForSwap !== false`); never the requester's own group; same coach only.
-  - Multi-factor scoring (Coach: 30, Berth: 20, Proximity: 30, Target willingness: 10, Age/Category: 10).
-  - "Why this match?" explainability generation. Typical journeys produce 50-500 recommendations.
+## Data-Shape Contract (API → UI)
+- Journey detail `GET /api/journeys/:id` returns `{ journey, passengers, groupPassengers, groupSplitInfo, recommendationCount, swaps }` — **no seatMapData**; fetch `getSeatMap(id)` separately (returns `{ journey, seatMap: { bays, coach, ... }, groupSplitInfo }`).
+- `groupSplitInfo.perGroup[]` = per-group entries `{ groupId, isSplit, separatedPassengerIds, clusterBay, ... }`.
+- `frontend/src/utils/groupUtils.js` = shared contract helpers: `extractGroups(detail)`,
+  `getPerGroupSplitInfos`, `findGroupSplitInfo`, `getSeparatedSeatNumbers(group)`,
+  `buildSeatClusters(seats)` (adjacent-bay clustering ≤4 seats apart for CoachViz lines).
+- Matches payload: `recommendations[]` = `{ requester{ id, name, coach, seatNumber, berthType }, target{...}, matchScore, whyReasons[], breakdown }` (no bringsCloser used).
 
-- **Voluntary Swap Request Flow**:
-  - Swap creation (`POST /api/swaps`) with PENDING status.
-  - Swap response management: Accept (`POST /api/swaps/:id/accept`), Reject (`POST /api/swaps/:id/reject`), Cancel (`POST /api/swaps/:id/cancel`).
-  - Atomic seat number and berth exchange upon acceptance in application state.
-  - Multi-perspective tabs (Received / Sent) for demonstration.
+## Journey Entry Split (latest)
+- Two SEPARATE entries now: **My Journeys** (`/journeys` — browsable train list page `pages/Journeys.jsx` with search) and **New Journey** (`/journey/create` — full train + members form). Navbar links: My Journeys / New Journey / Exchange Requests / Notifications; Dashboard banner has "Browse All Journeys" + "Create New Journey".
+- Note: `pages/Recommendations.jsx` still EXISTS and is routed (`/journey/:id/recommendations`) — earlier "deleted" memory note was wrong; source of truth wins.
 
-- **Synthetic Dataset Integration**:
-  - Generator script (`backend/dataset/generate_dataset.py`) & Validation suite (`backend/dataset/validate_dataset.py`) integrated.
-  - Complete synthetic railway dataset in `backend/dataset/uploads/` (180 journeys, 30 trains, 70 stations, 12,000 bookings, 35,100 passengers, 32,985 active seat assignments, 103 test scenario labels).
-  - Dataset status checking (`GET /api/dataset/status`), dataset parsing (`POST /api/dataset/load`), and dataset seeding (`POST /api/dataset/seed`).
-  - Auto-seeding: first `GET /api/journeys` (or journey detail/seatmap) seeds all 180 dataset journeys + passengers into MongoDB (or in-memory fallback) when dataset journeys are absent (checked via `createdBy: 'synthetic_dataset_importer'`, NOT an empty-collection check). Bulk `insertMany` in 1,000-doc chunks.
-  - Dataset parse cache in `datasetService.js` keyed by uploads folder file mtimes, so the 50k+ CSV rows parse once per dataset version, not per request.
-  - Dataset distribution (tuned): 80% GROUP_TOGETHER bookings; `willing_to_exchange` = TRUE for ~80% of confirmed passengers. Per journey: passengers fill the journey's default coach first (e.g. B2 72, B1 72, B3 remainder, few in SL/2A/CC).
-  - Legacy demo purge: on first request after boot, journeys with `_id` starting `demo_journey_` or `createdBy` starting `demo_user` (and their passengers/swaps) are deleted from DB and memory. This fixed the `Cast to ObjectId failed for value "demo_journey_..."` error.
-
-## Currently Existing Functionality
-- Dataset-driven flow: Landing -> Login/Register -> Dashboard (180 dataset journeys listed) -> Journey Details / Seat Map / Recommendations -> Request Swap -> Accept Swap -> Updated Arrangement.
-- Full CRUD operations on journeys and passengers.
-- Resilient execution with or without a running MongoDB instance.
-- Fully populated synthetic dataset auto-loaded on first journeys request.
-
-## UI Notes
-- Navbar top links: New Journey, Exchange Requests, Notifications (the Dashboard link was removed per user request; Dashboard is reached after login/register).
-- Landing CTA row has a single "Create New Journey" button (the "Explore Journeys & Dataset" button was removed).
-- All demo entry points removed from UI: Landing explore button, CreateJourney "Auto-fill Demo Split Data" button, Navbar demo launch handler, demo login services.
-
-## Pending / TODO
-- No explicit unresolved `TODO` comments in the codebase.
-- Future expansion points (documented in roadmap): real-time WebSocket notifications, multi-coach class layouts (2AC, 1AC, CC), QR verification.
+## Removed (superseded)
+- `pages/Recommendations.jsx`, `components/Sidebar.jsx`, `components/PassengerCard.jsx` deleted —
+  Matches/JourneyDetails cover their roles. Do not re-import them.
+- All demo entry points remain removed (UI, `/api/journeys/demo-seed`, `/api/auth/demo`).
 
 ## Known Issues
-- None currently blocking execution or compilation. Production Vite build produces 0 errors.
+- None blocking. Production build passes; Three.js chunk (~747 kB) is lazy-loaded only on
+  desktop landing (acceptable for demo; could be manualChunks-tuned later).
 
-## Important Notes
-- The application explicitly disclaims official railway ticketing authority on all user-facing pages.
-- When creating or modifying swap logic, ensure atomic updates preserve both `seatNumber` and `berthType` fields simultaneously.
-- Directory structure uses `frontend/` (React/Vite) and `backend/` (Express/Node) instead of the previous `client/` and `server/` names.
+## Backend (unchanged this pass)
+Dataset auto-seed (180 journeys), purge of legacy demo docs, per-group split analysis, matcher
+(willing group members as targets), dataset parse cache — all as previously documented. MongoDB connected.

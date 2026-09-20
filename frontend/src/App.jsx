@@ -6,6 +6,7 @@ import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import Journeys from './pages/Journeys';
 import CreateJourney from './pages/CreateJourney';
 import JourneyDetails from './pages/JourneyDetails';
 import SeatMapPage from './pages/SeatMapPage';
@@ -29,6 +30,7 @@ export function App() {
 
               {/* Application Journey & Swap Routes */}
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/journeys" element={<Journeys />} />
               <Route path="/journey/create" element={<CreateJourney />} />
               <Route path="/journey/:id" element={<JourneyDetails />} />
               <Route path="/journey/:id/seats" element={<SeatMapPage />} />
