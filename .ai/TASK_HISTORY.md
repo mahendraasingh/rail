@@ -1,5 +1,13 @@
 # Task History
 
+## Directory Restructure: `client/` → `frontend/`, `server/` → `backend/`
+- **Task**: Rename and relocate project directories from `client/`/`server/` to `frontend/`/`backend/`.
+- **Outcome**: Successfully moved all frontend files to `frontend/` and all backend files to `backend/`. Removed old empty directories. Updated root `package.json` scripts and all `.ai/` documentation. No source code modifications required — only directory structure and orchestration scripts changed.
+
+## Localhost Environment Execution
+- **Task**: Run RailTogether client and server on localhost.
+- **Outcome**: Successfully spawned both client (Vite on port 5173) and server (Express on port 5000 with MongoDB connected). Verified backend health endpoint (`/api/health`).
+
 ## Existing Project Snapshot
 
 ### Purpose
@@ -10,7 +18,7 @@ Initial AI-readable snapshot of the existing RailTogether codebase to establish 
 - Frontend: 11 pages and 14 reusable components with Tailwind CSS styling and responsive layouts.
 - Backend: Express REST API with 5 routers, 4 controllers, 4 Mongoose models, and matching/seat/dataset domain services.
 - Data Layer: MongoDB schema design with active fallback support.
-- Dataset Architecture: `server/dataset/uploads/` directory initialized with `.gitkeep` and connected to `datasetService.js`.
+- Dataset Architecture: `backend/dataset/uploads/` directory initialized with `.gitkeep` and connected to `datasetService.js`.
 
 ### Important Existing Areas
 1. **Seat & Coach Modeling** (`seatUtils.js`, `seatService.js`, `SeatMap.jsx`, `SeatCard.jsx`).
@@ -18,4 +26,4 @@ Initial AI-readable snapshot of the existing RailTogether codebase to establish 
 3. **Voluntary Swap Lifecycle** (`swapController.js`, `swapRoutes.js`, `SwapRequestCard.jsx`, `SwapRequests.jsx`).
 4. **Journey & Passenger Management** (`journeyController.js`, `passengerController.js`, `JourneyDetails.jsx`, `CreateJourney.jsx`).
 5. **Authentication & Session** (`authController.js`, `authMiddleware.js`, `AuthContext.jsx`, `Login.jsx`, `Register.jsx`).
-6. **Dataset Ingestion Scaffold** (`datasetService.js`, `datasetRoutes.js`, `server/dataset/uploads/`).
+6. **Dataset Ingestion Scaffold** (`datasetService.js`, `datasetRoutes.js`, `backend/dataset/uploads/`).

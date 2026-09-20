@@ -4,10 +4,10 @@
   "private": true,
   "description": "RailTogether - Voluntary railway seat-exchange and group consolidation platform",
   "scripts": {
-    "install:all": "npm install && npm install --prefix server && npm install --prefix client",
-    "server": "npm run dev --prefix server",
-    "client": "npm run dev --prefix client",
-    "dev": "node -e \"const { spawn } = require('child_process'); const s = spawn('npm', ['run', 'dev', '--prefix', 'server'], { stdio: 'inherit', shell: true }); const c = spawn('npm', ['run', 'dev', '--prefix', 'client'], { stdio: 'inherit', shell: true });\""
+    "install:all": "npm install && npm install --prefix backend && npm install --prefix frontend",
+    "server": "npm run dev --prefix backend",
+    "client": "npm run dev --prefix frontend",
+    "dev": "node -e \"const { spawn } = require('child_process'); const s = spawn('npm', ['run', 'dev', '--prefix', 'backend'], { stdio: 'inherit', shell: true }); const c = spawn('npm', ['run', 'dev', '--prefix', 'frontend'], { stdio: 'inherit', shell: true });\""
   },
   "devDependencies": {}
 }

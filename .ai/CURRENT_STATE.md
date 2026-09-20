@@ -1,7 +1,9 @@
 # Current State
 
 ## Overall Status
-**Fully Functional Full-Stack MVP (Hackathon Ready)**. The backend and frontend build cleanly, with active endpoints, persistent database models, an in-memory fallback mechanism, interactive coach visualization, and end-to-end voluntary swap coordination.
+**Fully Functional Full-Stack MVP (Active & Running on Localhost)**.
+- **Frontend**: `http://localhost:5173/` (Vite) — source in `frontend/`
+- **Backend API**: `http://localhost:5000/` (Express.js, connected to MongoDB) — source in `backend/`
 
 ## Already Implemented
 
@@ -35,10 +37,10 @@
 
 - **Synthetic Dataset Handling**:
   - Dataset status checking (`GET /api/dataset/status`) with graceful message when empty.
-  - Dataset parser (`server/services/datasetService.js`) supporting future CSV and JSON uploads.
+  - Dataset parser (`backend/services/datasetService.js`) supporting future CSV and JSON uploads.
 
 ## Partially Implemented
-- **Synthetic Dataset Uploads**: The loader architecture is fully implemented, but `server/dataset/uploads/` is kept empty (with `.gitkeep`) pending user dataset upload.
+- **Synthetic Dataset Uploads**: The loader architecture is fully implemented, but `backend/dataset/uploads/` is kept empty (with `.gitkeep`) pending user dataset upload.
 
 ## Currently Existing Functionality
 - Complete 15-step demo flow runnable via the UI (*Landing -> Try Demo -> Dashboard -> Split Detection -> Recommendations -> Request Swap -> Accept Swap -> Updated Arrangement*).
@@ -55,3 +57,4 @@
 ## Important Notes
 - The application explicitly disclaims official railway ticketing authority on all user-facing pages.
 - When creating or modifying swap logic, ensure atomic updates preserve both `seatNumber` and `berthType` fields simultaneously.
+- Directory structure uses `frontend/` (React/Vite) and `backend/` (Express/Node) instead of the previous `client/` and `server/` names.

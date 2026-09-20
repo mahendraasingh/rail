@@ -21,18 +21,18 @@ graph TD
     
     Server --> Mongo[("MongoDB (Mongoose)")]
     Server -.-> FallbackStore[("In-Memory Store Fallback")]
-    DatasetSvc -.-> DatasetFiles[("server/dataset/uploads/*.csv, *.json")]
+    DatasetSvc -.-> DatasetFiles[("backend/dataset/uploads/*.csv, *.json")]
 ```
 
 ## Directory Structure
 
-- `client/`:
+- `frontend/`:
   - `src/components/`: Reusable UI elements (`Navbar`, `Sidebar`, `Button`, `Card`, `Badge`, `Modal`, `EmptyState`, `LoadingSpinner`) and domain visualizers (`SeatMap`, `SeatCard`, `PassengerCard`, `MatchCard`, `SwapRequestCard`, `JourneySummary`).
   - `src/pages/`: Route page containers (`Landing`, `Login`, `Register`, `Dashboard`, `CreateJourney`, `JourneyDetails`, `SeatMapPage`, `Recommendations`, `SwapRequests`, `Notifications`, `Profile`).
   - `src/services/`: Client-side Axios API modules (`api.js`, `authService.js`, `journeyService.js`, `passengerService.js`, `swapService.js`).
   - `src/context/` & `src/hooks/`: React context (`AuthContext.jsx`) and custom hooks (`useAuth.js`).
   - `src/utils/`: Formatting helpers, berth code determination, and app constants.
-- `server/`:
+- `backend/`:
   - `config/`: MongoDB connection setup (`db.js`).
   - `controllers/`: HTTP request handlers for auth, journeys, passengers, and swaps.
   - `models/`: Mongoose schemas (`User.js`, `Journey.js`, `Passenger.js`, `SwapRequest.js`).
@@ -45,12 +45,12 @@ graph TD
 
 | Component | Location | Purpose | Dependencies / Relations |
 | :--- | :--- | :--- | :--- |
-| `SeatMap` | `client/src/components/SeatMap.jsx` | Renders coach bays, compartments & seats | Uses `SeatCard`, interacts with swap modal |
-| `MatchCard` | `client/src/components/MatchCard.jsx` | Shows compatibility score & reasons | Triggers swap modal on exchange request |
-| `SwapRequestCard` | `client/src/components/SwapRequestCard.jsx` | Manages pending/confirmed swap cards | Dispatches accept/reject/cancel requests |
-| `matchingService` | `server/services/matchingService.js` | Generates ranked exchange recommendations | Uses `seatUtils` and `matchingUtils` |
-| `seatService` | `server/services/seatService.js` | Generates 72-berth seat map data structure | Uses `seatUtils` to calculate bay groupings |
-| `datasetService` | `server/services/datasetService.js` | Parses synthetic CSV/JSON files | Reads from `server/dataset/uploads/` |
+| `SeatMap` | `frontend/src/components/SeatMap.jsx` | Renders coach bays, compartments & seats | Uses `SeatCard`, interacts with swap modal |
+| `MatchCard` | `frontend/src/components/MatchCard.jsx` | Shows compatibility score & reasons | Triggers swap modal on exchange request |
+| `SwapRequestCard` | `frontend/src/components/SwapRequestCard.jsx` | Manages pending/confirmed swap cards | Dispatches accept/reject/cancel requests |
+| `matchingService` | `backend/services/matchingService.js` | Generates ranked exchange recommendations | Uses `seatUtils` and `matchingUtils` |
+| `seatService` | `backend/services/seatService.js` | Generates 72-berth seat map data structure | Uses `seatUtils` to calculate bay groupings |
+| `datasetService` | `backend/services/datasetService.js` | Parses synthetic CSV/JSON files | Reads from `backend/dataset/uploads/` |
 
 ## Application Flow
 
