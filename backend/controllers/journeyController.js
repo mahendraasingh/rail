@@ -3,7 +3,7 @@ const Journey = require('../models/Journey');
 const Passenger = require('../models/Passenger');
 const SwapRequest = require('../models/SwapRequest');
 const { getDBStatus } = require('../config/db');
-const { analyzeGroupSplit, getBerthTypeFromSeat } = require('../utils/seatUtils');
+const { analyzeGroupSplits, getBerthTypeFromSeat } = require('../utils/seatUtils');
 const { generateCoachSeatMap } = require('../services/seatService');
 const { findMatchesForJourney } = require('../services/matchingService');
 const { loadDataset, getDatasetStatus, isDatasetJourneyId } = require('../services/datasetService');
@@ -294,7 +294,7 @@ const getJourneyById = async (req, res) => {
     }
 
     const groupPassengers = passengers.filter((p) => p.groupId);
-    const groupSplitInfo = analyzeGroupSplit(groupPassengers);
+    const groupSplitInfo = analyzeGroupSplits(groupPassengers);
     // Matches are coach-specific; use only passengers seated in the journey's coach
     const matchesResult = findMatchesForJourney({
       passengers: isDatasetJourneyId(journeyIdStr)
@@ -350,11 +350,20 @@ const getJourneySeatMap = async (req, res) => {
         : passengers,
       activeSwaps: swaps,
     });
-    const recommendedSeats = matchesResult.recommendations.map((r) => ({
-      targetSeatNumber: r.target.seatNumber,
-      requesterSeatNumber: r.requester.seatNumber,
-      matchScore: r.matchScore,
-    }));
+    // Seat map highlights only the BEST target seat per separated passenger
+    // (recommendations arrive sorted by score) — otherwise the coach is
+    // flooded with amber markers and the map loses meaning.
+    const seenRequesters = new Set();
+    const recommendedSeats = [];
+    matchesResult.recommendations.forEach((r) => {
+      if (seenRequesters.has(r.requester.id)) return;
+      seenRequesters.add(r.requester.id);
+      recommendedSeats.push({
+        targetSeatNumber: r.target.seatNumber,
+        requesterSeatNumber: r.requester.seatNumber,
+        matchScore: r.matchScore,
+      });
+    });
 
     const seatMap = generateCoachSeatMap({
       coach: journey.coach || 'B2',

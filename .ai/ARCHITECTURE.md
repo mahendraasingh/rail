@@ -38,7 +38,7 @@ graph TD
   - `models/`: Mongoose schemas (`User.js`, `Journey.js`, `Passenger.js`, `SwapRequest.js`).
   - `routes/`: Express endpoint declarations.
   - `services/`: Domain logic for matching (`matchingService.js`), seat mapping (`seatService.js`), and dataset file loading (`datasetService.js`).
-  - `utils/`: Coach bay split mathematics (`seatUtils.js`) and matching scoring weights (`matchingUtils.js`).
+  - `utils/`: Coach bay split mathematics (`seatUtils.js`, incl. per-group `analyzeGroupSplits`) and matching scoring weights (`matchingUtils.js`).
   - `dataset/uploads/`: Dedicated directory for user-provided synthetic datasets.
 
 ## Important Components
@@ -48,8 +48,8 @@ graph TD
 | `SeatMap` | `frontend/src/components/SeatMap.jsx` | Renders coach bays, compartments & seats | Uses `SeatCard`, interacts with swap modal |
 | `MatchCard` | `frontend/src/components/MatchCard.jsx` | Shows compatibility score & reasons | Triggers swap modal on exchange request |
 | `SwapRequestCard` | `frontend/src/components/SwapRequestCard.jsx` | Manages pending/confirmed swap cards | Dispatches accept/reject/cancel requests |
-| `matchingService` | `backend/services/matchingService.js` | Generates ranked exchange recommendations | Uses `seatUtils` and `matchingUtils` |
-| `seatService` | `backend/services/seatService.js` | Generates 72-berth seat map data structure | Uses `seatUtils` to calculate bay groupings |
+| `matchingService` | `backend/services/matchingService.js` | Generates ranked exchange recommendations (per-group clusters; candidates include willing members of other groups) | Uses `seatUtils` and `matchingUtils` |
+| `seatService` | `backend/services/seatService.js` | Generates 72-berth seat map data structure (per-group split coloring; amber = best target per separated passenger) | Uses `seatUtils` to calculate bay groupings |
 | `datasetService` | `backend/services/datasetService.js` | Parses synthetic CSV/JSON files (cached by uploads-folder mtimes) | Reads from `backend/dataset/uploads/` |
 
 ## Application Flow

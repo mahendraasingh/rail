@@ -1,5 +1,10 @@
 # Task History
 
+## Per-Group Split Analysis & Green-Dominant Seat Maps
+- **Task**: User reported seat maps showing only 1-2 green rows with the rest red, and zero green swap recommendations; asked to retune the dataset (more together-groups, more willing-to-exchange passengers) and make results visible on the frontend.
+- **Root cause**: (a) All analysis call sites passed every group into `analyzeGroupSplit` as one blob — the entire coach was treated as a single group, so only the dominant bay stayed green. (b) The matcher only accepted solo travellers as swap targets; solos are rare, so recommendations were ~0. (c) Amber markers only rendered on empty seats, but swap targets are occupied.
+- **Outcome**: `analyzeGroupSplits` (per-group) added to `seatUtils.js` and used in `seatService`/`journeyController`; `matchingService.js` rewritten (per-group cluster bays, willing members of other groups eligible as targets); `matchingUtils.js` group-target penalty removed; dataset retuned to 80% GROUP_TOGETHER + 80% willing, regenerated, validator PASSED, MongoDB re-seeded. Seat maps now green-dominant (e.g. 62/4/4), amber best-target markers visible, 50-500 recommendations per journey. `.ai` updated in the same pass.
+
 ## Demo Removal, CastError Fix & Dataset Auto-Load
 - **Task**: Fix `Cast to ObjectId failed for value "demo_journey_1789901065024"` shown on localhost, make the synthetic dataset journeys visible on the site, remove the explore/demo buttons everywhere and the Navbar "Dashboard" top-row link.
 - **Root cause**: A stale MongoDB Journey doc with string `_id: demo_journey_...` (left by the old demo seed) both (a) broke ObjectId-cast lookups and (b) blocked dataset auto-seeding, which only ran when the journeys collection was completely empty.

@@ -1,4 +1,4 @@
-const { getBerthTypeFromSeat, getBayNumber, analyzeGroupSplit } = require('../utils/seatUtils');
+const { getBerthTypeFromSeat, getBayNumber, analyzeGroupSplits } = require('../utils/seatUtils');
 
 /**
  * Service to generate coach layout representation and seat map annotations
@@ -21,9 +21,10 @@ const generateCoachSeatMap = ({ coach = 'B2', totalSeats = 72, passengers = [], 
 
   const recommendedSeatNumbers = new Set(recommendedSeats.map((r) => r.targetSeatNumber));
 
-  // Determine group split details
+  // Determine group split details (analyzed PER GROUP so members of one
+  // group never mark members of another group as separated)
   const groupPassengers = scopedPassengers.filter((p) => p.groupId);
-  const groupSplitInfo = analyzeGroupSplit(groupPassengers);
+  const groupSplitInfo = analyzeGroupSplits(groupPassengers);
   const separatedIdSet = new Set(groupSplitInfo.separatedPassengerIds);
 
   const bays = [];
@@ -54,7 +55,10 @@ const generateCoachSeatMap = ({ coach = 'B2', totalSeats = 72, passengers = [], 
         }
       }
 
-      if (category !== 'GROUP' && category !== 'SEPARATED_GROUP' && recommendedSeatNumbers.has(seatNum)) {
+      // Highlight swap-target seats (amber) even when occupied by a willing
+      // passenger — that seat IS the recommended exchange opportunity.
+      // Separated (red) seats keep their color so the problem stays visible.
+      if (category !== 'SEPARATED_GROUP' && recommendedSeatNumbers.has(seatNum)) {
         category = 'RECOMMENDED';
       }
 

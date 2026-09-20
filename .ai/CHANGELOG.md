@@ -1,5 +1,13 @@
 # Changelog
 
+## Per-Group Split Analysis, Matcher Overhaul & Dataset Retune
+- Fixed seat maps showing almost everyone red: `analyzeGroupSplit` was fed ALL groups at once (treating the whole coach as one giant group, so only the dominant bay stayed green). Added `analyzeGroupSplits` (per-group analysis, aggregate result) in `seatUtils.js`; `seatService.js` and `journeyController.js` now use it.
+- Fixed zero recommendations: the matcher only accepted SOLO travellers as swap targets (rare in dataset). `matchingService.js` rewritten: per-group cluster bays, candidates = solo travellers + willing members of OTHER groups (never own group, never already-separated members, `isAvailableForSwap !== false`).
+- `matchingUtils.js`: target-in-another-willing-group now scores the full +10 (was +4 penalty).
+- Dataset retuned in `generate_dataset.py`: 68%→80% GROUP_TOGETHER bookings; `willing_to_exchange` 60%→80%. Regenerated + validator PASSED.
+- Seat map amber markers now highlight the BEST target seat per separated passenger (sorted recommendations, first per requester) and can appear on occupied seats (the occupant is the swap opportunity); red separated seats keep their color.
+- MongoDB dataset wiped & re-seeded. Verified: J000001 = 62 green / 4 red / 4 amber; J000002 = 57/9/6; J000010 = 70/1/1; recommendationCounts 50-500+ per journey.
+
 ## Demo Removal, Dataset Auto-Load & CastError Fix
 - Removed all 1-Click Demo entry points: `POST /api/journeys/demo-seed` (+ broken `seedDemoJourney`/`getDemoDataPayload` in `journeyController.js`), `POST /api/auth/demo`, frontend `seedDemoJourney`/`demoLogin` services, `AuthContext.demoLogin`, Navbar demo launch handler, Landing "Explore Journeys & Dataset" button, CreateJourney "Auto-fill Demo Split Data" button.
 - Removed the Navbar "Dashboard" top-row link per user request (Dashboard still reachable via login/register redirect).

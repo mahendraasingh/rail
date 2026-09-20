@@ -48,12 +48,12 @@
     "8": 300
   },
   "arrangement_distribution": {
-    "GROUP_TOGETHER": 7622,
-    "HIGHLY_SPLIT": 464,
-    "MODERATELY_SPLIT": 1160,
+    "GROUP_TOGETHER": 9025,
+    "HIGHLY_SPLIT": 232,
+    "MODERATELY_SPLIT": 580,
     "NO_POSSIBLE_MATCH": 116,
     "PRIMARY_DEMO": 1,
-    "SLIGHTLY_SPLIT": 1925
+    "SLIGHTLY_SPLIT": 1334
   },
   "active_confirmed_passengers": 32985
 }

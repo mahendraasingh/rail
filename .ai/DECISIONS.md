@@ -1,5 +1,18 @@
 # Technical Decisions
 
+## [Matching] - Per-Group Split Analysis + Group Members as Valid Swap Targets
+
+### Decision
+Group split analysis is performed per `groupId` (`analyzeGroupSplits` in `backend/utils/seatUtils.js`), aggregating each group's own cluster bay — never across groups. The matching engine (`backend/services/matchingService.js`) computes separation relative to the requester's OWN group bay and accepts as swap candidates both solo travellers AND willing members of other groups (`isAvailableForSwap !== false`, same coach, never the requester's own group, never already-separated members). Seat map amber RECOMMENDED markers show only the best-scoring target per separated passenger and may render on occupied seats; red separated seats always keep their color.
+
+### Evidence
+[`backend/utils/seatUtils.js`](file:///d:/rail/backend/utils/seatUtils.js), [`backend/services/matchingService.js`](file:///d:/rail/backend/services/matchingService.js), [`backend/utils/matchingUtils.js`](file:///d:/rail/backend/utils/matchingUtils.js), [`backend/services/seatService.js`](file:///d:/rail/backend/services/seatService.js).
+
+### Impact
+Fixes "everyone red except 1-2 rows" (whole coach treated as one group) and "zero recommendations" (solo-only targets). Dataset retuned to 80% GROUP_TOGETHER and 80% willing_to_exchange so maps are green-dominant with realistic amber opportunities (verified 62/4/4 green/red/amber on J000001). All changes visible on the frontend without frontend edits (additive `groupSplitInfo` fields).
+
+---
+
 ## [Dataset] - Remove 1-Click Demo Everywhere; Auto-Seed via Presence Check with Legacy-Doc Purge
 
 ### Decision

@@ -49,6 +49,72 @@ const calculateSeatDistance = (seatA, seatB) => {
   return bayDist * 10 + Math.min(rawDist, 8);
 };
 
+/**
+ * Analyze MULTIPLE travelling groups (per groupId) and aggregate their split status.
+ * Each group is clustered around its own bay, so members of different groups
+ * never mark each other as separated.
+ */
+const analyzeGroupSplits = (groupPassengers) => {
+  if (!groupPassengers || groupPassengers.length === 0) {
+    return {
+      isSplit: false,
+      statusMessage: 'No travelling groups on this coach.',
+      separatedCount: 0,
+      separatedPassengerIds: [],
+      splitGroupCount: 0,
+      totalGroupCount: 0,
+      perGroup: [],
+      clusterBay: null,
+      maxBaySpan: 0,
+      details: [],
+    };
+  }
+
+  const groups = new Map();
+  groupPassengers.forEach((p) => {
+    const key = String(p.groupId);
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(p);
+  });
+
+  const allSeparatedIds = [];
+  const perGroup = [];
+  let totalSeparated = 0;
+  let splitGroupCount = 0;
+  let minBay = Infinity;
+  let maxBay = -Infinity;
+
+  groups.forEach((members, groupId) => {
+    const info = analyzeGroupSplit(members);
+    if (info.isSplit) {
+      splitGroupCount += 1;
+      totalSeparated += info.separatedCount;
+      info.separatedPassengerIds.forEach((id) => allSeparatedIds.push(id));
+    }
+    (info.passengerBays || []).forEach((pb) => {
+      minBay = Math.min(minBay, pb.bay);
+      maxBay = Math.max(maxBay, pb.bay);
+    });
+    perGroup.push({ groupId, ...info });
+  });
+
+  const isSplit = splitGroupCount > 0;
+  return {
+    isSplit,
+    statusMessage: isSplit
+      ? `${splitGroupCount} group${splitGroupCount > 1 ? 's are' : ' is'} split across bays. ${totalSeparated} passenger${totalSeparated === 1 ? ' is' : 's are'} separated.`
+      : 'All groups are comfortably seated together in their compartments.',
+    separatedCount: totalSeparated,
+    separatedPassengerIds: allSeparatedIds,
+    splitGroupCount,
+    totalGroupCount: groups.size,
+    perGroup,
+    clusterBay: null,
+    maxBaySpan: isSplit ? Math.max(0, maxBay - minBay) : 0,
+    details: perGroup,
+  };
+};
+
 // Analyze a list of group passengers to detect if they are split
 const analyzeGroupSplit = (groupPassengers) => {
   if (!groupPassengers || groupPassengers.length <= 1) {
@@ -122,4 +188,5 @@ module.exports = {
   getBayNumber,
   calculateSeatDistance,
   analyzeGroupSplit,
+  analyzeGroupSplits,
 };

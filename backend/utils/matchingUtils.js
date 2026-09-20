@@ -64,16 +64,17 @@ const calculateMatchScore = ({
     score += 5;
   }
 
-  // 4. Target Passenger Independence (+10 max)
-  // If target passenger has no groupId (solo traveller), higher probability of agreeable voluntary exchange
+  // 4. Target Passenger Willingness/Independence (+10 max)
+  // Solo travellers are ideal; willing members of other groups are equally valid targets.
   const isTargetSolo = !targetPassenger.groupId;
   if (isTargetSolo) {
     score += 10;
     breakdown.push({ factor: 'Target is Solo Passenger', points: 10 });
     whyReasons.push('✓ Passenger is a solo traveller available for voluntary exchange');
   } else {
-    score += 4;
-    breakdown.push({ factor: 'Target in Group', points: 4 });
+    score += 10;
+    breakdown.push({ factor: 'Target in Another Willing Group', points: 10 });
+    whyReasons.push('✓ Passenger is a willing member of another travelling group');
   }
 
   // 5. Age / Special Compatibility (+10 max)

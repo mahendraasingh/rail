@@ -651,11 +651,11 @@ def main(output_root: str = "."):
             arrangement = "PRIMARY_DEMO"
         else:
             bucket = bidx % 100
-            if bucket < 68:
+            if bucket < 80:
                 arrangement = "GROUP_TOGETHER"
-            elif bucket < 85:
+            elif bucket < 92:
                 arrangement = "SLIGHTLY_SPLIT"
-            elif bucket < 95:
+            elif bucket < 97:
                 arrangement = "MODERATELY_SPLIT"
             elif bucket < 99:
                 arrangement = "HIGHLY_SPLIT"
@@ -838,7 +838,7 @@ def main(output_root: str = "."):
         else:
             pref_pool = ["LOWER", "MIDDLE", "UPPER", "SIDE_LOWER", "SIDE_UPPER"]
             preferred_berth_type = pref_pool[(int(pid[1:]) * 5) % len(pref_pool)]
-        willing = (int(pid[1:]) % 10) < 6 or pid in {
+        willing = (int(pid[1:]) % 10) < 8 or pid in {
             special_passenger_ids["demo_candidate_1"], special_passenger_ids["demo_candidate_2"], special_passenger_ids["demo_candidate_3"]
         }
         same_coach_only = (int(pid[1:]) % 10) < 7

@@ -22,12 +22,15 @@
 - **Seat Map & Visualization**:
   - 72-berth 3AC/Sleeper coach model divided into 9 compartment bays.
   - Color-coded categories: Group Member (Emerald), Separated Member (Rose), Recommended Swap (Amber), Other (Slate), Empty (Dashed).
+  - Split analysis is PER GROUP (`analyzeGroupSplits` in `seatUtils.js`): each group clusters around its own bay, so members of one group never mark members of another group as separated. Result: green-dominant seat maps (~57-65 green, 1-11 red per coach).
+  - Amber RECOMMENDED markers appear on the BEST target seat per separated passenger (occupied seats included — the occupant is the swap opportunity); red separated seats keep their color.
   - Selected seat inspection drawer and direct swap request trigger from map.
 
 - **Deterministic Matching Engine**:
-  - Group cluster bay identification and distance calculations.
-  - Multi-factor scoring (Coach: 30, Berth: 20, Proximity: 30, Solo: 10, Age/Category: 10).
-  - "Why this match?" explainability generation.
+  - PER-GROUP cluster bay identification: a passenger is "separated" only relative to their own group's bay.
+  - Swap candidates = solo travellers AND willing members of OTHER groups (`isAvailableForSwap !== false`); never the requester's own group; same coach only.
+  - Multi-factor scoring (Coach: 30, Berth: 20, Proximity: 30, Target willingness: 10, Age/Category: 10).
+  - "Why this match?" explainability generation. Typical journeys produce 50-500 recommendations.
 
 - **Voluntary Swap Request Flow**:
   - Swap creation (`POST /api/swaps`) with PENDING status.
@@ -41,6 +44,7 @@
   - Dataset status checking (`GET /api/dataset/status`), dataset parsing (`POST /api/dataset/load`), and dataset seeding (`POST /api/dataset/seed`).
   - Auto-seeding: first `GET /api/journeys` (or journey detail/seatmap) seeds all 180 dataset journeys + passengers into MongoDB (or in-memory fallback) when dataset journeys are absent (checked via `createdBy: 'synthetic_dataset_importer'`, NOT an empty-collection check). Bulk `insertMany` in 1,000-doc chunks.
   - Dataset parse cache in `datasetService.js` keyed by uploads folder file mtimes, so the 50k+ CSV rows parse once per dataset version, not per request.
+  - Dataset distribution (tuned): 80% GROUP_TOGETHER bookings; `willing_to_exchange` = TRUE for ~80% of confirmed passengers. Per journey: passengers fill the journey's default coach first (e.g. B2 72, B1 72, B3 remainder, few in SL/2A/CC).
   - Legacy demo purge: on first request after boot, journeys with `_id` starting `demo_journey_` or `createdBy` starting `demo_user` (and their passengers/swaps) are deleted from DB and memory. This fixed the `Cast to ObjectId failed for value "demo_journey_..."` error.
 
 ## Currently Existing Functionality

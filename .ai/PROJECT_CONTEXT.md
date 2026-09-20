@@ -17,11 +17,11 @@ RailTogether is an assistive voluntary railway seat-exchange coordinator designe
 ## Existing Features
 
 1. **Group Split Detection**:
-   - **What it does**: Computes coach compartment bay assignments (8 berths per bay in 72-berth standard 3AC/Sleeper layout) and calculates bay span to detect when group members are separated across different compartments.
+   - **What it does**: Computes coach compartment bay assignments (8 berths per bay in 72-berth standard 3AC/Sleeper layout) and detects separation PER GROUP — each group is clustered around its own bay (`analyzeGroupSplits`); members of one group never mark members of another group as separated.
    - **Implementation**: [`backend/utils/seatUtils.js`](file:///d:/rail/backend/utils/seatUtils.js), [`frontend/src/utils/seatUtils.js`](file:///d:/rail/frontend/src/utils/seatUtils.js).
 
 2. **Deterministic Compatibility Match Scoring**:
-   - **What it does**: Evaluates potential seat exchanges between separated group members and eligible solo passengers using a transparent 100-point scoring algorithm (Same Coach: +30, Same Berth Type: +20, Proximity Gain: +30, Solo Passenger: +10, Age/Berth Eligibility: +10) with explicit explainability reasons ("Why this match?").
+   - **What it does**: Evaluates potential seat exchanges between separated group members and eligible targets (solo travellers AND willing members of other groups) using a transparent 100-point scoring algorithm (Same Coach: +30, Same Berth Type: +20, Proximity Gain: +30, Target Willingness/Independence: +10, Age/Berth Eligibility: +10) with explicit explainability reasons ("Why this match?").
    - **Implementation**: [`backend/services/matchingService.js`](file:///d:/rail/backend/services/matchingService.js), [`backend/utils/matchingUtils.js`](file:///d:/rail/backend/utils/matchingUtils.js).
 
 3. **Interactive Coach Seat Map**:
@@ -60,3 +60,4 @@ RailTogether is an assistive voluntary railway seat-exchange coordinator designe
 3. **Dataset Directory State**: `backend/dataset/uploads/` contains the full generated synthetic dataset (14 CSVs + summary). Do not treat it as empty; deleting these files disables dataset auto-seeding.
 4. **No Demo Mode**: All 1-Click demo entry points (UI buttons, `/api/journeys/demo-seed`, `/api/auth/demo`) were removed by user request. Do not reintroduce them.
 5. **Mixed/String IDs**: `_id` and reference fields on `Journey`/`Passenger`/`SwapRequest` are `Mixed` (dataset uses string IDs like `J000001`); never cast these paths to `ObjectId`, and guard `findById` with `ObjectId.isValid`.
+6. **Per-Group Analysis & Dataset Tuning**: Split analysis is always per `groupId` — never feed multiple groups into single-group `analyzeGroupSplit`. Dataset targets: ~80% GROUP_TOGETHER bookings, ~80% `willing_to_exchange`; seat maps are green-dominant with amber best-target markers.
