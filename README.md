@@ -217,7 +217,6 @@ The matching engine (`server/services/matchingService.js`) uses a deterministic,
 ### Authentication
 - `POST /api/auth/register` — Register a new passenger
 - `POST /api/auth/login` — Login passenger
-- `POST /api/auth/demo` — Instant demo login
 - `GET /api/auth/me` — Current profile
 
 ### Journeys
@@ -225,7 +224,6 @@ The matching engine (`server/services/matchingService.js`) uses a deterministic,
 - `POST /api/journeys` — Create journey with passengers
 - `GET /api/journeys/:id` — Get journey with split analysis
 - `GET /api/journeys/:id/seatmap` — Generate coach layout
-- `POST /api/journeys/demo-seed` — 1-Click seed demo journey
 
 ### Matching & Swaps
 - `GET /api/journeys/:journeyId/matches` — Compute recommendations

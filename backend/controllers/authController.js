@@ -157,28 +157,8 @@ const getMe = async (req, res) => {
   return res.status(404).json({ message: 'User not found' });
 };
 
-// @desc    Instant Demo login
-// @route   POST /api/auth/demo
-// @access  Public
-const demoLogin = async (req, res) => {
-  const demoUser = {
-    _id: 'demo_user_1',
-    name: 'Mahendra (Travelling Group Leader)',
-    email: 'demo.passenger@railtogether.app',
-    phone: '+91 9876543210',
-  };
-  return res.json({
-    _id: demoUser._id,
-    name: demoUser.name,
-    email: demoUser.email,
-    phone: demoUser.phone,
-    token: generateToken(demoUser._id, demoUser.name, demoUser.email),
-  });
-};
-
 module.exports = {
   registerUser,
   loginUser,
   getMe,
-  demoLogin,
 };

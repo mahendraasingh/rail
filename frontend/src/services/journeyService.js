@@ -21,11 +21,6 @@ export const journeyService = {
     return response.data;
   },
 
-  seedDemoJourney: async () => {
-    const response = await api.post('/journeys/demo-seed');
-    return response.data;
-  },
-
   deleteJourney: async (id) => {
     const response = await api.delete(`/journeys/${id}`);
     return response.data;

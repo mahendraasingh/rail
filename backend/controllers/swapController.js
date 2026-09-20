@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const SwapRequest = require('../models/SwapRequest');
 const Passenger = require('../models/Passenger');
 const Journey = require('../models/Journey');
@@ -5,24 +6,69 @@ const { getDBStatus } = require('../config/db');
 const { findMatchesForJourney } = require('../services/matchingService');
 const { getInMemoryStore } = require('./journeyController');
 
+// Helper to safely find passenger by ID
+const findPassengerById = async (id) => {
+  if (!id) return null;
+  const idStr = id.toString();
+  if (getDBStatus()) {
+    try {
+      if (mongoose.Types.ObjectId.isValid(idStr)) {
+        const doc = await Passenger.findById(idStr);
+        if (doc) return doc;
+      }
+      const doc = await Passenger.findOne({ _id: idStr });
+      if (doc) return doc;
+    } catch (err) {
+      console.warn('[Passenger Lookup Warning]:', err.message);
+    }
+  }
+  const store = getInMemoryStore();
+  return store.passengers.find((p) => p._id && p._id.toString() === idStr);
+};
+
+// Helper to safely find swap by ID
+const findSwapById = async (id) => {
+  if (!id) return null;
+  const idStr = id.toString();
+  if (getDBStatus()) {
+    try {
+      if (mongoose.Types.ObjectId.isValid(idStr)) {
+        const doc = await SwapRequest.findById(idStr);
+        if (doc) return doc;
+      }
+      const doc = await SwapRequest.findOne({ _id: idStr });
+      if (doc) return doc;
+    } catch (err) {
+      console.warn('[Swap Lookup Warning]:', err.message);
+    }
+  }
+  const store = getInMemoryStore();
+  return store.swaps.find((s) => s._id && s._id.toString() === idStr);
+};
+
 // @desc    Get match recommendations for a journey
 // @route   GET /api/journeys/:journeyId/matches
 // @access  Private
 const getJourneyMatches = async (req, res) => {
   try {
     const { journeyId } = req.params;
+    const jIdStr = journeyId.toString();
     let passengers = [];
     let swaps = [];
 
     if (getDBStatus()) {
-      passengers = await Passenger.find({ journeyId });
-      swaps = await SwapRequest.find({ journeyId });
+      try {
+        passengers = await Passenger.find({ journeyId: jIdStr });
+        swaps = await SwapRequest.find({ journeyId: jIdStr });
+      } catch (err) {
+        console.warn('[Match Passenger lookup warning]:', err.message);
+      }
     }
 
     if (passengers.length === 0) {
       const store = getInMemoryStore();
-      passengers = store.passengers.filter((p) => p.journeyId.toString() === journeyId);
-      swaps = store.swaps.filter((s) => s.journeyId.toString() === journeyId);
+      passengers = store.passengers.filter((p) => p.journeyId && p.journeyId.toString() === jIdStr);
+      swaps = store.swaps.filter((s) => s.journeyId && s.journeyId.toString() === jIdStr);
     }
 
     const matchesResult = findMatchesForJourney({ passengers, activeSwaps: swaps });
@@ -44,19 +90,8 @@ const createSwapRequest = async (req, res) => {
       return res.status(400).json({ message: 'Missing required swap request parameters' });
     }
 
-    let requester = null;
-    let target = null;
-
-    if (getDBStatus()) {
-      requester = await Passenger.findById(requesterPassengerId);
-      target = await Passenger.findById(targetPassengerId);
-    }
-
-    if (!requester || !target) {
-      const store = getInMemoryStore();
-      requester = requester || store.passengers.find((p) => p._id.toString() === requesterPassengerId.toString());
-      target = target || store.passengers.find((p) => p._id.toString() === targetPassengerId.toString());
-    }
+    const requester = await findPassengerById(requesterPassengerId);
+    const target = await findPassengerById(targetPassengerId);
 
     if (!requester || !target) {
       return res.status(404).json({ message: 'Requester or Target passenger not found' });
@@ -74,28 +109,35 @@ const createSwapRequest = async (req, res) => {
       berthType: target.berthType,
     };
 
-    if (getDBStatus()) {
-      const swap = await SwapRequest.create({
-        journeyId,
-        requesterPassengerId,
-        targetPassengerId,
-        requesterSeat,
-        targetSeat,
-        reason: reason || 'Travelling with group members and looking to sit closer together.',
-        matchScore: matchScore || 85,
-        status: 'PENDING',
-      });
+    const newSwapId = 'SWAP_' + Date.now();
 
-      return res.status(201).json(swap);
+    if (getDBStatus()) {
+      try {
+        const swap = await SwapRequest.create({
+          _id: newSwapId,
+          journeyId: journeyId.toString(),
+          requesterPassengerId: requesterPassengerId.toString(),
+          targetPassengerId: targetPassengerId.toString(),
+          requesterSeat,
+          targetSeat,
+          reason: reason || 'Travelling with group members and looking to sit closer together.',
+          matchScore: matchScore || 85,
+          status: 'PENDING',
+        });
+
+        return res.status(201).json(swap);
+      } catch (err) {
+        console.warn('[DB swap create failed, falling back to memory]:', err.message);
+      }
     }
 
     // In-memory store
     const store = getInMemoryStore();
     const newSwap = {
-      _id: 'swap_' + Date.now(),
-      journeyId,
-      requesterPassengerId,
-      targetPassengerId,
+      _id: newSwapId,
+      journeyId: journeyId.toString(),
+      requesterPassengerId: requesterPassengerId.toString(),
+      targetPassengerId: targetPassengerId.toString(),
       requesterPassenger: requester,
       targetPassenger: target,
       requesterSeat,
@@ -121,12 +163,11 @@ const getReceivedSwaps = async (req, res) => {
   try {
     let swaps = [];
     if (getDBStatus()) {
-      swaps = await SwapRequest.find({ status: { $in: ['PENDING', 'ACCEPTED', 'REJECTED'] } })
-        .populate('journeyId')
-        .populate('requesterPassengerId')
-        .populate('targetPassengerId')
-        .sort({ createdAt: -1 });
-      return res.json(swaps);
+      try {
+        swaps = await SwapRequest.find({ status: { $in: ['PENDING', 'ACCEPTED', 'REJECTED'] } })
+          .sort({ createdAt: -1 });
+        if (swaps.length > 0) return res.json(swaps);
+      } catch (_) {}
     }
 
     const store = getInMemoryStore();
@@ -143,12 +184,11 @@ const getSentSwaps = async (req, res) => {
   try {
     let swaps = [];
     if (getDBStatus()) {
-      swaps = await SwapRequest.find({})
-        .populate('journeyId')
-        .populate('requesterPassengerId')
-        .populate('targetPassengerId')
-        .sort({ createdAt: -1 });
-      return res.json(swaps);
+      try {
+        swaps = await SwapRequest.find({})
+          .sort({ createdAt: -1 });
+        if (swaps.length > 0) return res.json(swaps);
+      } catch (_) {}
     }
 
     const store = getInMemoryStore();
@@ -164,16 +204,18 @@ const getSentSwaps = async (req, res) => {
 const getSwapsByJourney = async (req, res) => {
   try {
     const { journeyId } = req.params;
+    const jIdStr = journeyId.toString();
+
     if (getDBStatus()) {
-      const swaps = await SwapRequest.find({ journeyId })
-        .populate('requesterPassengerId')
-        .populate('targetPassengerId')
-        .sort({ createdAt: -1 });
-      if (swaps.length > 0) return res.json(swaps);
+      try {
+        const swaps = await SwapRequest.find({ journeyId: jIdStr })
+          .sort({ createdAt: -1 });
+        if (swaps.length > 0) return res.json(swaps);
+      } catch (_) {}
     }
 
     const store = getInMemoryStore();
-    const swaps = store.swaps.filter((s) => s.journeyId.toString() === journeyId);
+    const swaps = store.swaps.filter((s) => s.journeyId && s.journeyId.toString() === jIdStr);
     return res.json(swaps);
   } catch (error) {
     return res.status(500).json({ message: error.message });
@@ -186,16 +228,8 @@ const getSwapsByJourney = async (req, res) => {
 const acceptSwap = async (req, res) => {
   try {
     const { id } = req.params;
-    let swap = null;
-
-    if (getDBStatus()) {
-      swap = await SwapRequest.findById(id);
-    }
-
-    const store = getInMemoryStore();
-    if (!swap) {
-      swap = store.swaps.find((s) => s._id.toString() === id);
-    }
+    const idStr = id.toString();
+    let swap = await findSwapById(idStr);
 
     if (!swap) {
       return res.status(404).json({ message: 'Swap request not found' });
@@ -206,43 +240,11 @@ const acceptSwap = async (req, res) => {
     }
 
     // Exchange seats between requester and target passenger
-    const reqPassengerId = swap.requesterPassengerId._id || swap.requesterPassengerId;
-    const tgtPassengerId = swap.targetPassengerId._id || swap.targetPassengerId;
+    const reqPassengerId = (swap.requesterPassengerId?._id || swap.requesterPassengerId).toString();
+    const tgtPassengerId = (swap.targetPassengerId?._id || swap.targetPassengerId).toString();
 
-    if (getDBStatus()) {
-      const requester = await Passenger.findById(reqPassengerId);
-      const target = await Passenger.findById(tgtPassengerId);
-
-      if (requester && target) {
-        const tempSeat = requester.seatNumber;
-        const tempBerth = requester.berthType;
-
-        requester.seatNumber = target.seatNumber;
-        requester.berthType = target.berthType;
-        await requester.save();
-
-        target.seatNumber = tempSeat;
-        target.berthType = tempBerth;
-        await target.save();
-      }
-
-      swap.status = 'ACCEPTED';
-      await swap.save();
-
-      return res.json({
-        message: 'Exchange Confirmed! Seats have been rearranged in application journey state.',
-        swap,
-        arrangement: {
-          requester: { id: reqPassengerId, newSeat: requester?.seatNumber, newBerth: requester?.berthType },
-          target: { id: tgtPassengerId, newSeat: target?.seatNumber, newBerth: target?.berthType },
-        },
-        disclaimer: 'This confirmation represents the agreed exchange within RailTogether. It does not automatically modify an official railway reservation.',
-      });
-    }
-
-    // In-memory swap execution
-    const requester = store.passengers.find((p) => p._id.toString() === reqPassengerId.toString());
-    const target = store.passengers.find((p) => p._id.toString() === tgtPassengerId.toString());
+    const requester = await findPassengerById(reqPassengerId);
+    const target = await findPassengerById(tgtPassengerId);
 
     if (requester && target) {
       const tempSeat = requester.seatNumber;
@@ -253,10 +255,19 @@ const acceptSwap = async (req, res) => {
 
       target.seatNumber = tempSeat;
       target.berthType = tempBerth;
+
+      if (getDBStatus() && typeof requester.save === 'function') {
+        await requester.save();
+        await target.save();
+      }
     }
 
     swap.status = 'ACCEPTED';
-    swap.updatedAt = new Date().toISOString();
+    if (getDBStatus() && typeof swap.save === 'function') {
+      await swap.save();
+    } else {
+      swap.updatedAt = new Date().toISOString();
+    }
 
     return res.json({
       message: 'Exchange Confirmed! Seats have been rearranged in application journey state.',
@@ -272,31 +283,26 @@ const acceptSwap = async (req, res) => {
   }
 };
 
+
 // @desc    Reject a voluntary seat swap request
 // @route   POST /api/swaps/:id/reject
 // @access  Private
 const rejectSwap = async (req, res) => {
   try {
     const { id } = req.params;
-    let swap = null;
+    const idStr = id.toString();
+    const swap = await findSwapById(idStr);
 
-    if (getDBStatus()) {
-      swap = await SwapRequest.findById(id);
-      if (swap) {
-        swap.status = 'REJECTED';
-        await swap.save();
-        return res.json({ message: 'Exchange request declined.', swap });
-      }
-    }
-
-    const store = getInMemoryStore();
-    swap = store.swaps.find((s) => s._id.toString() === id);
     if (!swap) {
       return res.status(404).json({ message: 'Swap request not found' });
     }
 
     swap.status = 'REJECTED';
-    swap.updatedAt = new Date().toISOString();
+    if (getDBStatus() && typeof swap.save === 'function') {
+      await swap.save();
+    } else {
+      swap.updatedAt = new Date().toISOString();
+    }
 
     return res.json({ message: 'Exchange request declined.', swap });
   } catch (error) {
@@ -310,25 +316,19 @@ const rejectSwap = async (req, res) => {
 const cancelSwap = async (req, res) => {
   try {
     const { id } = req.params;
-    let swap = null;
+    const idStr = id.toString();
+    const swap = await findSwapById(idStr);
 
-    if (getDBStatus()) {
-      swap = await SwapRequest.findById(id);
-      if (swap) {
-        swap.status = 'CANCELLED';
-        await swap.save();
-        return res.json({ message: 'Exchange request cancelled.', swap });
-      }
-    }
-
-    const store = getInMemoryStore();
-    swap = store.swaps.find((s) => s._id.toString() === id);
     if (!swap) {
       return res.status(404).json({ message: 'Swap request not found' });
     }
 
     swap.status = 'CANCELLED';
-    swap.updatedAt = new Date().toISOString();
+    if (getDBStatus() && typeof swap.save === 'function') {
+      await swap.save();
+    } else {
+      swap.updatedAt = new Date().toISOString();
+    }
 
     return res.json({ message: 'Exchange request cancelled.', swap });
   } catch (error) {

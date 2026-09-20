@@ -11,13 +11,13 @@
   - Registration (`POST /api/auth/register`) with bcrypt password hashing.
   - Login (`POST /api/auth/login`) with JWT token generation and storage.
   - Profile endpoint (`GET /api/auth/me`) and Profile diagnostic view (`/profile`).
-  - Demo bypass mode (`POST /api/auth/demo`).
+  - (1-Click demo login/`/api/auth/demo` has been removed.)
 
 - **Journey & Group Passenger Management**:
   - Journey creation (`POST /api/journeys`) with route and coach attributes.
   - Dynamic passenger list addition with automatic berth determination (`Lower`, `Middle`, `Upper`, `Side Lower`, `Side Upper`).
   - Journey details view (`/journey/:id`) with group split status banners.
-  - 1-Click Demo Journey seeding (`POST /api/journeys/demo-seed`).
+  - (Demo journey seeding `/api/journeys/demo-seed` has been removed.)
 
 - **Seat Map & Visualization**:
   - 72-berth 3AC/Sleeper coach model divided into 9 compartment bays.
@@ -37,14 +37,22 @@
 
 - **Synthetic Dataset Integration**:
   - Generator script (`backend/dataset/generate_dataset.py`) & Validation suite (`backend/dataset/validate_dataset.py`) integrated.
-  - Complete synthetic railway dataset generated in `backend/dataset/uploads/` (180 journeys, 30 trains, 70 stations, 12,000 bookings, 35,100 passengers, 32,985 active seat assignments, 103 test scenario labels).
+  - Complete synthetic railway dataset in `backend/dataset/uploads/` (180 journeys, 30 trains, 70 stations, 12,000 bookings, 35,100 passengers, 32,985 active seat assignments, 103 test scenario labels).
   - Dataset status checking (`GET /api/dataset/status`), dataset parsing (`POST /api/dataset/load`), and dataset seeding (`POST /api/dataset/seed`).
+  - Auto-seeding: first `GET /api/journeys` (or journey detail/seatmap) seeds all 180 dataset journeys + passengers into MongoDB (or in-memory fallback) when dataset journeys are absent (checked via `createdBy: 'synthetic_dataset_importer'`, NOT an empty-collection check). Bulk `insertMany` in 1,000-doc chunks.
+  - Dataset parse cache in `datasetService.js` keyed by uploads folder file mtimes, so the 50k+ CSV rows parse once per dataset version, not per request.
+  - Legacy demo purge: on first request after boot, journeys with `_id` starting `demo_journey_` or `createdBy` starting `demo_user` (and their passengers/swaps) are deleted from DB and memory. This fixed the `Cast to ObjectId failed for value "demo_journey_..."` error.
 
 ## Currently Existing Functionality
-- Complete 15-step demo flow runnable via the UI (*Landing -> Try Demo -> Dashboard -> Split Detection -> Recommendations -> Request Swap -> Accept Swap -> Updated Arrangement*).
+- Dataset-driven flow: Landing -> Login/Register -> Dashboard (180 dataset journeys listed) -> Journey Details / Seat Map / Recommendations -> Request Swap -> Accept Swap -> Updated Arrangement.
 - Full CRUD operations on journeys and passengers.
 - Resilient execution with or without a running MongoDB instance.
-- Fully populated synthetic dataset ready to seed via API.
+- Fully populated synthetic dataset auto-loaded on first journeys request.
+
+## UI Notes
+- Navbar top links: New Journey, Exchange Requests, Notifications (the Dashboard link was removed per user request; Dashboard is reached after login/register).
+- Landing CTA row has a single "Create New Journey" button (the "Explore Journeys & Dataset" button was removed).
+- All demo entry points removed from UI: Landing explore button, CreateJourney "Auto-fill Demo Split Data" button, Navbar demo launch handler, demo login services.
 
 ## Pending / TODO
 - No explicit unresolved `TODO` comments in the codebase.

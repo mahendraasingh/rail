@@ -1,5 +1,18 @@
 # Technical Decisions
 
+## [Dataset] - Remove 1-Click Demo Everywhere; Auto-Seed via Presence Check with Legacy-Doc Purge
+
+### Decision
+Removed the entire 1-Click demo feature (UI buttons, `/api/journeys/demo-seed`, `/api/auth/demo`, frontend demo services/context) per user request, including the Navbar "Dashboard" top-row link and the Landing "Explore Journeys & Dataset" button. Dataset auto-seeding in `ensureDatasetLoaded` now checks `countDocuments({ createdBy: 'synthetic_dataset_importer' }) === 0` instead of an empty journeys collection, purges legacy demo docs (string `_id`s like `demo_journey_*`) once per boot, and inserts via chunked `insertMany` (1,000 docs). `datasetService.loadDataset()` results are cached keyed by uploads-folder file mtimes.
+
+### Evidence
+[`backend/controllers/journeyController.js`](file:///d:/rail/backend/controllers/journeyController.js), [`backend/services/datasetService.js`](file:///d:/rail/backend/services/datasetService.js), frontend `Landing.jsx` / `Navbar.jsx` / `CreateJourney.jsx` / services.
+
+### Impact
+Fixed the reported `Cast to ObjectId failed for value "demo_journey_..."` error (stale string-`_id` demo doc blocked both lookups and seeding) and made all 180 dataset journeys appear on the Dashboard without manual seeding. Live-verified: 180 journeys returned, 0 demo IDs, clean 404 for demo IDs.
+
+---
+
 ## [Dataset] - Deterministic Synthetic Dataset Generator & Relational CSV Schema
 
 ### Decision

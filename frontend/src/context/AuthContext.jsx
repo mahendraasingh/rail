@@ -35,12 +35,6 @@ export const AuthProvider = ({ children }) => {
     return data;
   };
 
-  const demoLogin = async () => {
-    const data = await authService.demoLogin();
-    setUser(data);
-    return data;
-  };
-
   const logout = () => {
     authService.logout();
     setUser(null);
@@ -53,7 +47,6 @@ export const AuthProvider = ({ children }) => {
         loading,
         login,
         register,
-        demoLogin,
         logout,
         isAuthenticated: !!user,
       }}

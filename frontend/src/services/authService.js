@@ -19,15 +19,6 @@ export const authService = {
     return response.data;
   },
 
-  demoLogin: async () => {
-    const response = await api.post('/auth/demo');
-    if (response.data?.token) {
-      localStorage.setItem('railtogether_token', response.data.token);
-      localStorage.setItem('railtogether_user', JSON.stringify(response.data));
-    }
-    return response.data;
-  },
-
   getMe: async () => {
     const response = await api.get('/auth/me');
     return response.data;

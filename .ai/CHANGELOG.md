@@ -1,5 +1,13 @@
 # Changelog
 
+## Demo Removal, Dataset Auto-Load & CastError Fix
+- Removed all 1-Click Demo entry points: `POST /api/journeys/demo-seed` (+ broken `seedDemoJourney`/`getDemoDataPayload` in `journeyController.js`), `POST /api/auth/demo`, frontend `seedDemoJourney`/`demoLogin` services, `AuthContext.demoLogin`, Navbar demo launch handler, Landing "Explore Journeys & Dataset" button, CreateJourney "Auto-fill Demo Split Data" button.
+- Removed the Navbar "Dashboard" top-row link per user request (Dashboard still reachable via login/register redirect).
+- Fixed `Cast to ObjectId failed for value "demo_journey_..." (type string)`: `ensureDatasetLoaded` now purges legacy demo docs (`_id` starting `demo_journey_`, `createdBy` starting `demo_user`) from MongoDB + memory once per boot before any lookups.
+- Fixed dataset not appearing: seeding condition changed from `Journey.countDocuments() === 0` (blocked by the stale demo doc) to `countDocuments({ createdBy: 'synthetic_dataset_importer' }) === 0`; seeding now uses bulk `insertMany` in 1,000-doc chunks (180 journeys + 35,100 passengers in seconds instead of 35k awaited `create` calls).
+- Added parse cache to `datasetService.loadDataset()` keyed by uploads-folder file mtimes (50k+ CSV rows parsed once per dataset version instead of per request).
+- Verified live: `GET /api/journeys` returns 180 dataset journeys with 0 stale demo IDs; journey detail + seatmap return 200; stale demo id returns clean 404; `vite build` passes.
+
 ## Synthetic Railway Dataset Integration & Generator Suite
 - Added `generate_dataset.py` (deterministic synthetic railway dataset generator) and `validate_dataset.py` (1.36M check validation suite) in `backend/dataset/`.
 - Generated 14 relational CSV files, `dataset_summary.json`, and `README.md` in `backend/dataset/uploads/` (180 journeys, 30 trains, 70 stations, 12,000 bookings, 35,100 passengers, 32,985 active seat assignments, 103 test scenario labels).

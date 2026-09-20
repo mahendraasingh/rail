@@ -50,7 +50,7 @@ graph TD
 | `SwapRequestCard` | `frontend/src/components/SwapRequestCard.jsx` | Manages pending/confirmed swap cards | Dispatches accept/reject/cancel requests |
 | `matchingService` | `backend/services/matchingService.js` | Generates ranked exchange recommendations | Uses `seatUtils` and `matchingUtils` |
 | `seatService` | `backend/services/seatService.js` | Generates 72-berth seat map data structure | Uses `seatUtils` to calculate bay groupings |
-| `datasetService` | `backend/services/datasetService.js` | Parses synthetic CSV/JSON files | Reads from `backend/dataset/uploads/` |
+| `datasetService` | `backend/services/datasetService.js` | Parses synthetic CSV/JSON files (cached by uploads-folder mtimes) | Reads from `backend/dataset/uploads/` |
 
 ## Application Flow
 
@@ -87,15 +87,15 @@ React UI updates status badge & redirects to `/swaps`
 - **Auth** (`/api/auth`):
   - `POST /register`: Create passenger account.
   - `POST /login`: Authenticate with email/password.
-  - `POST /demo`: 1-Click hackathon demo login.
   - `GET /me`: Get authenticated user profile.
+  - (`POST /demo` removed — demo login was removed entirely.)
 - **Journeys** (`/api/journeys`):
-  - `GET /`: List journeys.
+  - `GET /`: List journeys (auto-seeds the synthetic dataset on first call if dataset journeys are absent, after purging legacy demo docs).
   - `POST /`: Create journey with passengers.
   - `GET /:id`: Retrieve journey details and split analysis.
   - `GET /:id/seatmap`: Retrieve coach seat map layout.
-  - `POST /demo-seed`: Seed 12011 Shatabdi Express demo scenario.
   - `DELETE /:id`: Remove journey and associated passengers/swaps.
+  - (`POST /demo-seed` removed — demo journey seeding was removed entirely.)
 - **Passengers** (`/api/passengers`):
   - `POST /`: Add passenger to journey.
   - `GET /journey/:journeyId`: List passengers by journey.
@@ -122,7 +122,7 @@ React UI updates status badge & redirects to `/swaps`
 
 ## Authentication Flow
 
-1. User registers or logs in via `/api/auth/login` (or `/api/auth/demo`).
+1. User registers or logs in via `/api/auth/login`.
 2. Server signs a JWT token containing `{ id, name, email }`.
 3. Client stores `railtogether_token` in `localStorage`.
 4. Axios interceptor attaches `Authorization: Bearer <token>` to outbound requests.

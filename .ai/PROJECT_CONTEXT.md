@@ -10,7 +10,7 @@ RailTogether is an assistive voluntary railway seat-exchange coordinator designe
 - **Frontend**: React 18.3.1, Vite 6.0.11, Tailwind CSS 3.4.17, React Router DOM 6.28.2, Axios 1.7.9, Lucide React 0.474.0, clsx 2.1.1
 - **Backend**: Node.js (v24 compatible), Express.js 4.21.2, Mongoose 8.9.5, jsonwebtoken 9.0.2, bcryptjs 2.4.3, cors 2.8.5, dotenv 16.4.7
 - **Database**: MongoDB with Mongoose ODM (includes an automated in-memory store fallback when MongoDB is not connected)
-- **Authentication**: JWT Bearer token authentication + 1-Click Hackathon Demo mode
+- **Authentication**: JWT Bearer token authentication (1-Click Hackathon Demo mode removed)
 - **Styling**: Tailwind CSS with custom railway design tokens, Plus Jakarta Sans typography, and custom micro-animations
 - **Architecture**: Decoupled Client-Server Monorepo (`frontend/`, `backend/`, root orchestrator)
 
@@ -32,13 +32,9 @@ RailTogether is an assistive voluntary railway seat-exchange coordinator designe
    - **What it does**: Allows passengers to send exchange requests, review incoming requests, and accept/reject. Upon mutual acceptance, seat records are atomically exchanged in the application journey state.
    - **Implementation**: [`backend/controllers/swapController.js`](file:///d:/rail/backend/controllers/swapController.js), [`frontend/src/pages/SwapRequests.jsx`](file:///d:/rail/frontend/src/pages/SwapRequests.jsx), [`frontend/src/components/SwapRequestCard.jsx`](file:///d:/rail/frontend/src/components/SwapRequestCard.jsx).
 
-5. **1-Click Hackathon Demo Mode**:
-   - **What it does**: Instantly seeds and logs into the 12011 Kalka Shatabdi Express scenario with 4 split family members (B2-31, 32, 57, 58) and 3 candidate passengers (B2-45, 46, 60).
-   - **Implementation**: [`backend/controllers/journeyController.js`](file:///d:/rail/backend/controllers/journeyController.js#L14-L115), [`frontend/src/components/Navbar.jsx`](file:///d:/rail/frontend/src/components/Navbar.jsx).
-
-6. **Plug-and-Play Dataset Architecture**:
-   - **What it does**: Detects and validates synthetic CSV/JSON railway datasets uploaded to `backend/dataset/uploads/`. Falls back gracefully with status messaging when empty.
-   - **Implementation**: [`backend/services/datasetService.js`](file:///d:/rail/backend/services/datasetService.js), [`backend/routes/datasetRoutes.js`](file:///d:/rail/backend/routes/datasetRoutes.js).
+5. **Plug-and-Play Dataset Architecture**:
+   - **What it does**: Detects, validates, parses (with mtime-keyed cache) and auto-seeds synthetic CSV/JSON railway datasets from `backend/dataset/uploads/` on first journeys request. All 180 dataset journeys appear on the Dashboard.
+   - **Implementation**: [`backend/services/datasetService.js`](file:///d:/rail/backend/services/datasetService.js), [`backend/routes/datasetRoutes.js`](file:///d:/rail/backend/routes/datasetRoutes.js), `ensureDatasetLoaded`/`purgeLegacyDemoData` in [`backend/controllers/journeyController.js`](file:///d:/rail/backend/controllers/journeyController.js).
 
 ## Important Files
 
@@ -61,4 +57,6 @@ RailTogether is an assistive voluntary railway seat-exchange coordinator designe
 
 1. **No Direct Railway API / IRCTC Scrapers**: The application operates strictly with synthetic/simulated data and manual passenger entries.
 2. **Voluntary Human Consent Only**: The system never forces or automatically alters official railway ticket reservations; all actions represent assistive journey planning agreements.
-3. **Empty Dataset Upload Directory**: `backend/dataset/uploads/` is maintained with only `.gitkeep` until synthetic data files are provided by the user.
+3. **Dataset Directory State**: `backend/dataset/uploads/` contains the full generated synthetic dataset (14 CSVs + summary). Do not treat it as empty; deleting these files disables dataset auto-seeding.
+4. **No Demo Mode**: All 1-Click demo entry points (UI buttons, `/api/journeys/demo-seed`, `/api/auth/demo`) were removed by user request. Do not reintroduce them.
+5. **Mixed/String IDs**: `_id` and reference fields on `Journey`/`Passenger`/`SwapRequest` are `Mixed` (dataset uses string IDs like `J000001`); never cast these paths to `ObjectId`, and guard `findById` with `ObjectId.isValid`.

@@ -4,6 +4,27 @@ const { getDBStatus } = require('../config/db');
 
 const UPLOADS_DIR = path.join(__dirname, '..', 'dataset', 'uploads');
 
+// Parse cache: the relational dataset has 50k+ rows, so avoid re-parsing on every request.
+// Cache is invalidated automatically whenever the uploaded files change.
+let datasetCache = null;
+let datasetCacheSignature = '';
+
+const getUploadsSignature = () => {
+  try {
+    return fs
+      .readdirSync(UPLOADS_DIR)
+      .filter((f) => f.endsWith('.csv') || f.endsWith('.json'))
+      .map((f) => {
+        const st = fs.statSync(path.join(UPLOADS_DIR, f));
+        return `${f}:${st.mtimeMs}`;
+      })
+      .sort()
+      .join('|');
+  } catch (_) {
+    return '';
+  }
+};
+
 /**
  * Simple CSV parser helper
  */
@@ -70,6 +91,11 @@ const getDatasetStatus = () => {
  * Load and parse relational synthetic railway dataset from dataset/uploads/
  */
 const loadDataset = async () => {
+  const signature = getUploadsSignature();
+  if (datasetCache && signature === datasetCacheSignature) {
+    return datasetCache;
+  }
+
   const status = getDatasetStatus();
   if (!status.available) {
     return {
@@ -221,7 +247,7 @@ const loadDataset = async () => {
       }
     }
 
-    return {
+    const result = {
       success: true,
       message: `Successfully loaded ${loadedJourneys.length} journeys, ${loadedPassengers.length} confirmed passengers, and ${scenarioLabels.length} scenarios from synthetic dataset.`,
       data: {
@@ -231,6 +257,10 @@ const loadDataset = async () => {
         summary: summaryData,
       },
     };
+
+    datasetCache = result;
+    datasetCacheSignature = signature;
+    return result;
   } catch (error) {
     return {
       success: false,

@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 
 export const Profile = () => {
-  const { user, logout, demoLogin } = useAuth();
+  const { user, logout } = useAuth();
   const [datasetStatus, setDatasetStatus] = useState(null);
 
   useEffect(() => {

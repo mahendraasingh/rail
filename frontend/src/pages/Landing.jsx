@@ -1,7 +1,5 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
-import { journeyService } from '../services/journeyService';
+import React from 'react';
+import { Link } from 'react-router-dom';
 import Button from '../components/Button';
 import Card from '../components/Card';
 import Badge from '../components/Badge';
@@ -14,31 +12,10 @@ import {
   ShieldCheck,
   CheckCircle2,
   AlertTriangle,
-  ArrowRight,
-  Compass,
   MapPin,
 } from 'lucide-react';
 
 export const Landing = () => {
-  const { isAuthenticated, demoLogin } = useAuth();
-  const navigate = useNavigate();
-  const [demoLoading, setDemoLoading] = useState(false);
-
-  const handleStartDemo = async () => {
-    try {
-      setDemoLoading(true);
-      await demoLogin();
-      const demoRes = await journeyService.seedDemoJourney();
-      const journeyId = demoRes.journey?._id || demoRes.journey?.id;
-      navigate(`/journey/${journeyId}`);
-    } catch (err) {
-      console.error(err);
-      navigate('/dashboard');
-    } finally {
-      setDemoLoading(false);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-slate-50 overflow-hidden flex flex-col justify-between">
       {/* Hero Section */}
@@ -62,30 +39,11 @@ export const Landing = () => {
 
           {/* Call to action buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-            <Button
-              size="lg"
-              variant="accent"
-              icon={Sparkles}
-              loading={demoLoading}
-              onClick={handleStartDemo}
-              className="w-full sm:w-auto shadow-md hover:shadow-lg font-bold text-slate-950 px-8 py-3.5"
-            >
-              Explore Demo (1-Click)
-            </Button>
-
-            {isAuthenticated ? (
-              <Link to="/dashboard" className="w-full sm:w-auto">
-                <Button size="lg" variant="secondary" icon={ArrowRight} iconPosition="right" className="w-full justify-center">
-                  Go to Dashboard
-                </Button>
-              </Link>
-            ) : (
-              <Link to="/journey/create" className="w-full sm:w-auto">
-                <Button size="lg" variant="outline" icon={Train} className="w-full justify-center">
-                  Start Journey
-                </Button>
-              </Link>
-            )}
+            <Link to="/journey/create" className="w-full sm:w-auto">
+              <Button size="lg" variant="primary" icon={Train} className="w-full justify-center font-bold px-8 py-3.5">
+                Create New Journey
+              </Button>
+            </Link>
           </div>
         </div>
 

@@ -2,6 +2,9 @@ const mongoose = require('mongoose');
 
 const journeySchema = new mongoose.Schema(
   {
+    _id: {
+      type: mongoose.Schema.Types.Mixed,
+    },
     pnr: {
       type: String,
       required: [true, 'PNR is required'],
@@ -39,8 +42,7 @@ const journeySchema = new mongoose.Schema(
       uppercase: true,
     },
     createdBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      type: mongoose.Schema.Types.Mixed,
       required: false,
     },
     status: {
@@ -51,7 +53,17 @@ const journeySchema = new mongoose.Schema(
   },
   {
     timestamps: true,
+    _id: false, // Allows custom _id when specified, or auto ObjectId if not
   }
 );
 
+// Middleware to assign ObjectId if _id is not provided
+journeySchema.pre('save', function (next) {
+  if (!this._id) {
+    this._id = new mongoose.Types.ObjectId();
+  }
+  next();
+});
+
 module.exports = mongoose.model('Journey', journeySchema);
+

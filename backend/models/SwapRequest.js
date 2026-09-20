@@ -2,19 +2,19 @@ const mongoose = require('mongoose');
 
 const swapRequestSchema = new mongoose.Schema(
   {
+    _id: {
+      type: mongoose.Schema.Types.Mixed,
+    },
     journeyId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Journey',
+      type: mongoose.Schema.Types.Mixed,
       required: true,
     },
     requesterPassengerId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Passenger',
+      type: mongoose.Schema.Types.Mixed,
       required: true,
     },
     targetPassengerId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Passenger',
+      type: mongoose.Schema.Types.Mixed,
       required: true,
     },
     requesterSeat: {
@@ -43,7 +43,16 @@ const swapRequestSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
+    _id: false,
   }
 );
 
+swapRequestSchema.pre('save', function (next) {
+  if (!this._id) {
+    this._id = new mongoose.Types.ObjectId();
+  }
+  next();
+});
+
 module.exports = mongoose.model('SwapRequest', swapRequestSchema);
+

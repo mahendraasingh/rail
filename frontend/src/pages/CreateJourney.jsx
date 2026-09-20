@@ -12,7 +12,6 @@ import {
   Users,
   AlertCircle,
   ArrowRight,
-  Sparkles,
 } from 'lucide-react';
 
 export const CreateJourney = () => {
@@ -76,24 +75,6 @@ export const CreateJourney = () => {
     setPassengers((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleQuickPopulateShatabdi = () => {
-    setFormData({
-      pnr: '8493027156',
-      trainNumber: '12011',
-      trainName: 'Kalka Shatabdi Express',
-      source: 'New Delhi (NDLS)',
-      destination: 'Chandigarh (CDG)',
-      journeyDate: '2026-09-21',
-      coach: 'B2',
-    });
-    setPassengers([
-      { name: 'Mahendra (Self)', seatNumber: 31, coach: 'B2', berthType: 'UPPER', isGroup: true, ageCategory: 'ADULT' },
-      { name: 'Father (Rajesh)', seatNumber: 32, coach: 'B2', berthType: 'SIDE_UPPER', isGroup: true, ageCategory: 'SENIOR' },
-      { name: 'Mother (Sunita)', seatNumber: 57, coach: 'B2', berthType: 'LOWER', isGroup: true, ageCategory: 'SENIOR' },
-      { name: 'Sister (Pooja)', seatNumber: 58, coach: 'B2', berthType: 'MIDDLE', isGroup: true, ageCategory: 'ADULT' },
-    ]);
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -140,25 +121,13 @@ export const CreateJourney = () => {
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6 animate-fade-in">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            Create Train Journey
-          </h1>
-          <p className="text-sm text-slate-500 mt-0.5">
-            Enter your journey info and group passengers to detect seat splitting
-          </p>
-        </div>
-
-        <Button
-          variant="outline"
-          size="sm"
-          icon={Sparkles}
-          onClick={handleQuickPopulateShatabdi}
-          className="text-amber-800 bg-amber-50 border-amber-200 hover:bg-amber-100"
-        >
-          Auto-fill Demo Split Data
-        </Button>
+      <div>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+          Create Train Journey
+        </h1>
+        <p className="text-sm text-slate-500 mt-0.5">
+          Enter your journey info and group passengers to detect seat splitting
+        </p>
       </div>
 
       {error && (

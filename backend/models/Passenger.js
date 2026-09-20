@@ -2,19 +2,20 @@ const mongoose = require('mongoose');
 
 const passengerSchema = new mongoose.Schema(
   {
+    _id: {
+      type: mongoose.Schema.Types.Mixed,
+    },
     name: {
       type: String,
       required: [true, 'Passenger name is required'],
       trim: true,
     },
     journeyId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Journey',
+      type: mongoose.Schema.Types.Mixed,
       required: [true, 'Journey ID is required'],
     },
     userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      type: mongoose.Schema.Types.Mixed,
       required: false,
     },
     groupId: {
@@ -34,7 +35,7 @@ const passengerSchema = new mongoose.Schema(
     },
     berthType: {
       type: String,
-      enum: ['LOWER', 'MIDDLE', 'UPPER', 'SIDE_LOWER', 'SIDE_UPPER', 'WINDOW', 'AISLE'],
+      enum: ['LOWER', 'MIDDLE', 'UPPER', 'SIDE_LOWER', 'SIDE_UPPER', 'WINDOW', 'AISLE', 'CHAIR', 'EXECUTIVE'],
       default: 'LOWER',
     },
     ageCategory: {
@@ -54,7 +55,16 @@ const passengerSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
+    _id: false,
   }
 );
 
+passengerSchema.pre('save', function (next) {
+  if (!this._id) {
+    this._id = new mongoose.Types.ObjectId();
+  }
+  next();
+});
+
 module.exports = mongoose.model('Passenger', passengerSchema);
+

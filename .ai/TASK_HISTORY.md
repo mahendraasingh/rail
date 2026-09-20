@@ -1,5 +1,10 @@
 # Task History
 
+## Demo Removal, CastError Fix & Dataset Auto-Load
+- **Task**: Fix `Cast to ObjectId failed for value "demo_journey_1789901065024"` shown on localhost, make the synthetic dataset journeys visible on the site, remove the explore/demo buttons everywhere and the Navbar "Dashboard" top-row link.
+- **Root cause**: A stale MongoDB Journey doc with string `_id: demo_journey_...` (left by the old demo seed) both (a) broke ObjectId-cast lookups and (b) blocked dataset auto-seeding, which only ran when the journeys collection was completely empty.
+- **Outcome**: Legacy demo docs auto-purged (DB + memory) on first request; seeding re-keyed to `createdBy: 'synthetic_dataset_importer'` with chunked `insertMany`; `datasetService` parse cache added; demo endpoints (`/api/journeys/demo-seed`, `/api/auth/demo`) and all frontend demo UI/services removed; Navbar Dashboard link and Landing explore button removed. Verified live on localhost:5000 — 180 dataset journeys returned, 0 demo IDs, detail/seatmap 200, clean 404 for demo ids, frontend build passes.
+
 ## Synthetic Railway Dataset Integration
 - **Task**: Integrate synthetic railway dataset generator (`generate_dataset.py`) and validator (`validate_dataset.py`) into codebase and parse/seed relational CSV data into application.
 - **Outcome**: Placed generator and validator scripts in `backend/dataset/`. Generated and validated 14 relational CSV files in `backend/dataset/uploads/` (180 journeys, 35,100 passengers, 32,985 confirmed seat assignments, 103 test scenario labels). Updated `datasetService.js`, `journeyController.js`, and `datasetRoutes.js` to parse relational data and expose `/api/dataset/seed` for seeding dataset journeys into active application state. Passed 1.36 million validation checks.

@@ -25,13 +25,12 @@ import {
 import clsx from 'clsx';
 
 export const Dashboard = () => {
-  const { user, demoLogin } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   const [journeys, setJourneys] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [demoLoading, setDemoLoading] = useState(false);
   const [stats, setStats] = useState({
     pendingRequests: 0,
     confirmedSwaps: 0,
@@ -66,22 +65,8 @@ export const Dashboard = () => {
     fetchDashboardData();
   }, []);
 
-  const handleSeedDemo = async () => {
-    try {
-      setDemoLoading(true);
-      await demoLogin();
-      const demoRes = await journeyService.seedDemoJourney();
-      const jId = demoRes.journey?._id || demoRes.journey?.id;
-      navigate(`/journey/${jId}`);
-    } catch (err) {
-      setError(err.message || 'Failed to seed demo');
-    } finally {
-      setDemoLoading(false);
-    }
-  };
-
   if (loading) {
-    return <LoadingSpinner text="Loading your journeys..." className="min-h-[60vh]" />;
+    return <LoadingSpinner text="Loading journeys..." className="min-h-[60vh]" />;
   }
 
   return (
@@ -101,20 +86,9 @@ export const Dashboard = () => {
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          <Button
-            variant="accent"
-            size="md"
-            icon={Sparkles}
-            loading={demoLoading}
-            onClick={handleSeedDemo}
-            className="font-bold text-slate-950"
-          >
-            Load 12011 Demo Journey
-          </Button>
-
           <Link to="/journey/create">
-            <Button variant="outline" size="md" icon={PlusCircle} className="bg-white/10 text-white border-white/20 hover:bg-white/20">
-              New Journey
+            <Button variant="primary" size="md" icon={PlusCircle} className="font-bold shadow-md">
+              Create New Journey
             </Button>
           </Link>
         </div>
@@ -174,9 +148,9 @@ export const Dashboard = () => {
           <EmptyState
             icon={Train}
             title="No journeys registered yet"
-            description="Create a journey or load the pre-configured Hackathon demo scenario to see the matching engine in action."
-            actionText="Load Demo Journey (1-Click)"
-            onAction={handleSeedDemo}
+            description="Create a journey or browse loaded dataset trips to detect and coordinate seat exchanges."
+            actionText="Create New Journey"
+            onAction={() => navigate('/journey/create')}
           />
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

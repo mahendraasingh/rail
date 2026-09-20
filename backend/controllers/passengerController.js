@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Passenger = require('../models/Passenger');
 const { getDBStatus } = require('../config/db');
 const { getBerthTypeFromSeat } = require('../utils/seatUtils');
@@ -16,10 +17,13 @@ const addPassenger = async (req, res) => {
 
     const seatNum = parseInt(seatNumber, 10);
     const resolvedBerth = berthType || getBerthTypeFromSeat(seatNum);
+    const jIdStr = journeyId.toString();
+    const newPassengerId = 'PASS_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
 
     if (getDBStatus()) {
       const passenger = await Passenger.create({
-        journeyId,
+        _id: newPassengerId,
+        journeyId: jIdStr,
         name,
         coach: coach.toUpperCase().trim(),
         seatNumber: seatNum,
@@ -35,8 +39,8 @@ const addPassenger = async (req, res) => {
     // In-Memory store
     const store = getInMemoryStore();
     const newPassenger = {
-      _id: 'pass_' + Date.now(),
-      journeyId,
+      _id: newPassengerId,
+      journeyId: jIdStr,
       name,
       coach: coach.toUpperCase().trim(),
       seatNumber: seatNum,
@@ -60,14 +64,19 @@ const addPassenger = async (req, res) => {
 const getPassengersByJourney = async (req, res) => {
   try {
     const { journeyId } = req.params;
+    const jIdStr = journeyId.toString();
 
     if (getDBStatus()) {
-      const passengers = await Passenger.find({ journeyId }).sort({ seatNumber: 1 });
-      if (passengers.length > 0) return res.json(passengers);
+      try {
+        const passengers = await Passenger.find({ journeyId: jIdStr }).sort({ seatNumber: 1 });
+        if (passengers.length > 0) return res.json(passengers);
+      } catch (err) {
+        console.warn('[Passenger fetch error]:', err.message);
+      }
     }
 
     const store = getInMemoryStore();
-    const passengers = store.passengers.filter((p) => p.journeyId.toString() === journeyId);
+    const passengers = store.passengers.filter((p) => p.journeyId && p.journeyId.toString() === jIdStr);
     return res.json(passengers);
   } catch (error) {
     return res.status(500).json({ message: error.message });
@@ -80,6 +89,7 @@ const getPassengersByJourney = async (req, res) => {
 const updatePassenger = async (req, res) => {
   try {
     const { id } = req.params;
+    const idStr = id.toString();
     const updates = req.body;
 
     if (updates.seatNumber) {
@@ -90,12 +100,21 @@ const updatePassenger = async (req, res) => {
     }
 
     if (getDBStatus()) {
-      const passenger = await Passenger.findByIdAndUpdate(id, updates, { new: true });
-      if (passenger) return res.json(passenger);
+      try {
+        let passenger = null;
+        if (mongoose.Types.ObjectId.isValid(idStr)) {
+          passenger = await Passenger.findByIdAndUpdate(idStr, updates, { new: true });
+        } else {
+          passenger = await Passenger.findOneAndUpdate({ _id: idStr }, updates, { new: true });
+        }
+        if (passenger) return res.json(passenger);
+      } catch (err) {
+        console.warn('[Passenger update warning]:', err.message);
+      }
     }
 
     const store = getInMemoryStore();
-    const passenger = store.passengers.find((p) => p._id.toString() === id);
+    const passenger = store.passengers.find((p) => p._id && p._id.toString() === idStr);
     if (!passenger) {
       return res.status(404).json({ message: 'Passenger not found' });
     }
@@ -112,3 +131,4 @@ module.exports = {
   getPassengersByJourney,
   updatePassenger,
 };
+

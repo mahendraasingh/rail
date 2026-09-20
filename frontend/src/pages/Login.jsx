@@ -3,16 +3,15 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import Button from '../components/Button';
 import Card from '../components/Card';
-import { Train, Sparkles, Mail, Lock, AlertCircle, ArrowRight } from 'lucide-react';
+import { Train, Mail, Lock, AlertCircle } from 'lucide-react';
 
 export const Login = () => {
-  const { login, demoLogin } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [demoLoading, setDemoLoading] = useState(false);
   const [error, setError] = useState('');
 
   const handleSubmit = async (e) => {
@@ -29,18 +28,6 @@ export const Login = () => {
     }
   };
 
-  const handleDemoAccess = async () => {
-    setError('');
-    setDemoLoading(true);
-    try {
-      await demoLogin();
-      navigate('/dashboard');
-    } catch (err) {
-      setError(err.message || 'Demo access failed');
-    } finally {
-      setDemoLoading(false);
-    }
-  };
 
   return (
     <div className="min-h-[85vh] flex items-center justify-center px-4 sm:px-6 py-12">
@@ -55,26 +42,6 @@ export const Login = () => {
           <p className="text-sm text-slate-500">
             Coordinate voluntary seat swaps for your group
           </p>
-        </div>
-
-        {/* 1-Click Demo Shortcut Card */}
-        <div className="bg-amber-50 border border-amber-200/80 rounded-2xl p-4 flex items-center justify-between gap-3 shadow-2xs">
-          <div>
-            <div className="flex items-center gap-1.5 font-bold text-slate-900 text-xs uppercase tracking-wider">
-              <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-              <span>Hackathon Demo Mode</span>
-            </div>
-            <p className="text-xs text-slate-600 mt-0.5">Skip manual credentials and login instantly</p>
-          </div>
-          <Button
-            size="sm"
-            variant="accent"
-            loading={demoLoading}
-            onClick={handleDemoAccess}
-            className="font-bold text-slate-950 flex-shrink-0"
-          >
-            Quick Demo Login
-          </Button>
         </div>
 
         <Card className="p-6 sm:p-8">

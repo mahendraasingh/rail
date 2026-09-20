@@ -1,12 +1,9 @@
 import React, { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { journeyService } from '../services/journeyService';
 import Button from './Button';
 import {
   Train,
-  Sparkles,
-  LayoutDashboard,
   PlusCircle,
   ArrowLeftRight,
   Bell,
@@ -14,35 +11,15 @@ import {
   LogOut,
   Menu,
   X,
-  Compass,
 } from 'lucide-react';
 import clsx from 'clsx';
 
 export const Navbar = () => {
-  const { user, isAuthenticated, logout, demoLogin } = useAuth();
-  const navigate = useNavigate();
+  const { user, isAuthenticated, logout } = useAuth();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [demoLoading, setDemoLoading] = useState(false);
-
-  const handleLaunchDemo = async () => {
-    try {
-      setDemoLoading(true);
-      await demoLogin();
-      const demoRes = await journeyService.seedDemoJourney();
-      const journeyId = demoRes.journey?._id || demoRes.journey?.id;
-      setMobileMenuOpen(false);
-      navigate(`/journey/${journeyId}`);
-    } catch (err) {
-      console.error('Failed to seed demo:', err);
-      navigate('/dashboard');
-    } finally {
-      setDemoLoading(false);
-    }
-  };
 
   const navLinks = [
-    { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { label: 'New Journey', path: '/journey/create', icon: PlusCircle },
     { label: 'Exchange Requests', path: '/swaps', icon: ArrowLeftRight },
     { label: 'Notifications', path: '/notifications', icon: Bell },
@@ -98,18 +75,6 @@ export const Navbar = () => {
 
           {/* Actions & User Info */}
           <div className="hidden md:flex items-center gap-3">
-            {/* Demo Mode Button */}
-            <Button
-              variant="accent"
-              size="sm"
-              icon={Sparkles}
-              loading={demoLoading}
-              onClick={handleLaunchDemo}
-              className="bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold shadow-sm"
-            >
-              Try Demo (1-Click)
-            </Button>
-
             {isAuthenticated ? (
               <div className="flex items-center gap-2 border-l border-slate-200 pl-3">
                 <Link
@@ -143,16 +108,6 @@ export const Navbar = () => {
 
           {/* Mobile Menu Button */}
           <div className="flex items-center gap-2 md:hidden">
-            <Button
-              variant="accent"
-              size="xs"
-              icon={Sparkles}
-              loading={demoLoading}
-              onClick={handleLaunchDemo}
-              className="font-bold text-slate-950"
-            >
-              Demo
-            </Button>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 text-slate-600 hover:text-slate-900 rounded-xl hover:bg-slate-100"
