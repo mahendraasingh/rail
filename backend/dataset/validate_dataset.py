@@ -168,7 +168,7 @@ def main(root_arg: str = "."):
     seat_count_by_coach = Counter(s["coach_id"] for s in seats)
     for c in coaches:
         check("coach journey FK valid", c["journey_id"] in journey_ids, c["coach_id"])
-        check("coach class/capacity consistent", int(c["seat_capacity"]) == {"3A":64,"2A":48,"SL":72,"CC":78,"EC":56}[c["class_code"]], c["coach_id"])
+        check("coach class/capacity consistent", int(c["seat_capacity"]) == {"3A":72,"2A":48,"SL":72,"CC":78,"EC":56}[c["class_code"]], c["coach_id"])
         check("coach seat count equals capacity", seat_count_by_coach[c["coach_id"]] == int(c["seat_capacity"]), c["coach_id"])
     for j in journeys:
         train = train_by_id[j["train_id"]]

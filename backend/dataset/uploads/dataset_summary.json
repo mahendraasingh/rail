@@ -7,7 +7,7 @@
     "routes": 166,
     "journeys": 180,
     "coaches": 1938,
-    "seats": 128604,
+    "seats": 133260,
     "bookings": 12000,
     "passengers": 35100,
     "groups": 12000,
@@ -48,12 +48,12 @@
     "8": 300
   },
   "arrangement_distribution": {
-    "GROUP_TOGETHER": 3317,
-    "HIGHLY_SPLIT": 1686,
-    "MODERATELY_SPLIT": 2850,
-    "NO_POSSIBLE_MATCH": 1160,
+    "GROUP_TOGETHER": 7622,
+    "HIGHLY_SPLIT": 464,
+    "MODERATELY_SPLIT": 1160,
+    "NO_POSSIBLE_MATCH": 116,
     "PRIMARY_DEMO": 1,
-    "SLIGHTLY_SPLIT": 2274
+    "SLIGHTLY_SPLIT": 1925
   },
   "active_confirmed_passengers": 32985
 }

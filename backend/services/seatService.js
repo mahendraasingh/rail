@@ -4,15 +4,25 @@ const { getBerthTypeFromSeat, getBayNumber, analyzeGroupSplit } = require('../ut
  * Service to generate coach layout representation and seat map annotations
  */
 const generateCoachSeatMap = ({ coach = 'B2', totalSeats = 72, passengers = [], recommendedSeats = [] }) => {
+  // The seat map renders exactly ONE coach. The dataset stores passengers
+  // across every coach of the journey, so restrict to the requested coach.
+  // Fallback: if nothing matches (e.g. manual journeys without coach data),
+  // keep the original list to preserve legacy behavior.
+  const coachRef = String(coach || '').toUpperCase();
+  const coachPassengers = coachRef
+    ? passengers.filter((p) => String(p.coach || '').toUpperCase() === coachRef)
+    : passengers;
+  const scopedPassengers = coachPassengers.length > 0 ? coachPassengers : passengers;
+
   const passengerMap = new Map();
-  passengers.forEach((p) => {
+  scopedPassengers.forEach((p) => {
     passengerMap.set(p.seatNumber, p);
   });
 
   const recommendedSeatNumbers = new Set(recommendedSeats.map((r) => r.targetSeatNumber));
 
   // Determine group split details
-  const groupPassengers = passengers.filter((p) => p.groupId);
+  const groupPassengers = scopedPassengers.filter((p) => p.groupId);
   const groupSplitInfo = analyzeGroupSplit(groupPassengers);
   const separatedIdSet = new Set(groupSplitInfo.separatedPassengerIds);
 
@@ -87,7 +97,7 @@ const generateCoachSeatMap = ({ coach = 'B2', totalSeats = 72, passengers = [], 
     totalSeats,
     groupSplitInfo,
     bays,
-    passengerCount: passengers.length,
+    passengerCount: scopedPassengers.length,
   };
 };
 

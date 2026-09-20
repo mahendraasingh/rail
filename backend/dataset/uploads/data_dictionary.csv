@@ -35,7 +35,7 @@ coaches.csv,journey_id,STRING,Journey that owns this coach.,J000001,True,journey
 coaches.csv,coach_number,STRING,Coach label such as B2 or C1.,B1,True,
 coaches.csv,coach_type,ENUM,Journey coach type derived from class code.,AC_THREE_TIER,True,
 coaches.csv,class_code,ENUM,"3A, 2A, SL, CC, or EC.",3A,True,
-coaches.csv,seat_capacity,INTEGER,Number of seat/berth positions in the coach.,64,True,
+coaches.csv,seat_capacity,INTEGER,Number of seat/berth positions in the coach.,72,True,
 seats.csv,seat_id,STRING,Stable seat identifier within the journey-specific coach model.,SE0000001,True,PRIMARY KEY
 seats.csv,coach_id,STRING,Coach owning the seat.,CO000001,True,coaches.csv.coach_id
 seats.csv,coach_number,STRING,Denormalized coach number for application convenience.,B1,True,
@@ -77,9 +77,9 @@ seat_assignments.csv,booking_id,STRING,Booking of the passenger assigned to the 
 seat_assignments.csv,passenger_id,STRING,Passenger assigned to the seat.,P000001,True,passengers.csv.passenger_id
 seat_assignments.csv,coach_id,STRING,Journey-specific coach containing the seat.,CO000002,True,coaches.csv.coach_id
 seat_assignments.csv,coach_number,STRING,Denormalized coach label.,B2,True,
-seat_assignments.csv,seat_id,STRING,Seat position assigned to the passenger.,SE0000095,True,seats.csv.seat_id
+seat_assignments.csv,seat_id,STRING,Seat position assigned to the passenger.,SE0000103,True,seats.csv.seat_id
 seat_assignments.csv,seat_number,INTEGER,Denormalized numeric seat number.,31,True,
-seat_assignments.csv,berth_type,STRING,Denormalized berth/seat type.,LOWER,True,seats.csv.berth_type
+seat_assignments.csv,berth_type,STRING,Denormalized berth/seat type.,SIDE_LOWER,True,seats.csv.berth_type
 seat_assignments.csv,assignment_status,ENUM,ACTIVE in the current synthetic state.,ACTIVE,True,
 seat_assignments.csv,assigned_at,DATETIME,Synthetic timestamp for assignment creation.,2026-09-16 12:00:00,True,
 passenger_preferences.csv,preference_id,STRING,Stable preference record identifier.,PR0000001,True,PRIMARY KEY

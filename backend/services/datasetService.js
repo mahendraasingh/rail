@@ -144,6 +144,37 @@ const loadDataset = async () => {
         } catch (_) {}
       }
 
+      // The app renders ONE coach per journey (default 72-berth map), so each
+      // journey's default coach must be its busiest assigned coach.
+      const coachLoadByJourney = new Map();
+      assignmentsRows.forEach((a) => {
+        if (a.assignment_status && a.assignment_status !== 'ACTIVE') return;
+        const perCoach = coachLoadByJourney.get(a.journey_id) || new Map();
+        perCoach.set(a.coach_number, (perCoach.get(a.coach_number) || 0) + 1);
+        coachLoadByJourney.set(a.journey_id, perCoach);
+      });
+      const busiestCoachFor = (journeyId) => {
+        const perCoach = coachLoadByJourney.get(journeyId);
+        if (!perCoach || perCoach.size === 0) return 'B2';
+        let best = 'B2';
+        let bestCount = -1;
+        perCoach.forEach((count, coachNumber) => {
+          if (count > bestCount) {
+            bestCount = count;
+            best = coachNumber;
+          }
+        });
+        return best;
+      };
+
+      // Actual passenger count per group id (dataset rows include everyone).
+      const groupSizeById = new Map();
+      passengersRows.forEach((p) => {
+        if (p.group_id) {
+          groupSizeById.set(p.group_id, (groupSizeById.get(p.group_id) || 0) + 1);
+        }
+      });
+
       // Build indexing maps for fast lookup
       const trainMap = new Map();
       trainsRows.forEach((t) => trainMap.set(t.train_id, t));
@@ -188,7 +219,7 @@ const loadDataset = async () => {
           source: sourceName,
           destination: destName,
           journeyDate: j.journey_date || '2026-09-25',
-          coach: 'B2',
+          coach: busiestCoachFor(j.journey_id),
           status: j.journey_status || 'ACTIVE',
           createdBy: 'synthetic_dataset_importer',
         });
@@ -212,7 +243,9 @@ const loadDataset = async () => {
             passenger_id: p.passenger_id,
             journeyId: p.journey_id,
             name: p.full_name || p.name,
-            groupId: p.group_id || null,
+            // Single-passenger groups are genuine solo travellers: they must be
+            // available as voluntary swap candidates (no groupId).
+            groupId: p.group_id && groupSizeById.get(p.group_id) > 1 ? p.group_id : null,
             coach: assignment.coach_number || 'B2',
             seatNumber: parseInt(assignment.seat_number, 10),
             berthType: assignment.berth_type || 'LOWER',
@@ -270,6 +303,12 @@ const loadDataset = async () => {
   }
 };
 
+/**
+ * Dataset journeys use deterministic string ids (J000001, ...). Used to scope
+ * coach-aware behavior to dataset journeys only.
+ */
+const isDatasetJourneyId = (id) => /^J\d{6,}$/.test(String(id || ''));
+
 // Normalizer fallbacks
 const normalizeJourney = (j) => ({
   _id: j.journey_id || j._id || 'j_' + Date.now(),
@@ -300,4 +339,5 @@ const normalizePassenger = (p) => ({
 module.exports = {
   getDatasetStatus,
   loadDataset,
+  isDatasetJourneyId,
 };

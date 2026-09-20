@@ -173,14 +173,17 @@ COACH_TYPE = {
     "CC": "CHAIR_CAR",
     "EC": "EXECUTIVE_CHAIR_CAR",
 }
-SEAT_CAPACITY = {"3A": 64, "2A": 48, "SL": 72, "CC": 78, "EC": 56}
+SEAT_CAPACITY = {"3A": 72, "2A": 48, "SL": 72, "CC": 78, "EC": 56}
 
 
 def seat_layout(class_code: str):
     rows = []
     if class_code == "3A":
-        for bay in range(1, 9):
-            base = (bay - 1) * 6
+        # Canonical Indian Railways 72-berth layout: 9 bays x 8 berths
+        # (LOWER, MIDDLE, UPPER, LOWER, MIDDLE, UPPER, SIDE_LOWER, SIDE_UPPER).
+        # This matches the application's mod-8 bay/berth math exactly.
+        for bay in range(1, 10):
+            base = (bay - 1) * 8
             spec = [
                 (base + 1, "LOWER", "WINDOW", bay),
                 (base + 2, "MIDDLE", "MIDDLE", bay),
@@ -188,11 +191,10 @@ def seat_layout(class_code: str):
                 (base + 4, "LOWER", "WINDOW", bay),
                 (base + 5, "MIDDLE", "MIDDLE", bay),
                 (base + 6, "UPPER", "AISLE", bay),
+                (base + 7, "SIDE_LOWER", "SIDE", bay),
+                (base + 8, "SIDE_UPPER", "SIDE", bay),
             ]
             rows.extend(spec)
-        for i in range(16):
-            n = 49 + i
-            rows.append((n, "SIDE_LOWER" if i % 2 == 0 else "SIDE_UPPER", "SIDE", 9 + i // 2))
     elif class_code == "2A":
         for bay in range(1, 9):
             base = (bay - 1) * 4
@@ -615,14 +617,33 @@ def main(output_root: str = "."):
     for pid, seat_no in demo_pairs:
         preassigned[pid] = (demo_b2["coach_id"], seat_no)
 
-    def preferred_classes(booking, size):
-        weights = ["SL"] * 6 + ["3A"] * 5 + ["2A"] * 2 + ["CC"] + ["EC"]
-        if size >= 6:
-            weights += ["SL", "3A", "3A", "2A"]
-        choice = weights[(int(booking["booking_id"][2:]) * 17 + size * 13) % len(weights)]
-        return [choice, "3A", "SL", "2A", "CC", "EC"]
-
+    # 10. Seat assignments.
     active_confirmed_bookings = [b for b in bookings if b["booking_status"] == "CONFIRMED"]
+
+    # Deterministic coach fill order per journey: the primary 3A coach (B2)
+    # first, then remaining 3A coaches, then SL/2A/CC/EC. Concentrating each
+    # journey's passengers into B1/B2/B3 keeps the B2 seat map well populated.
+    coaches_by_journey = defaultdict(list)
+    for coach in coaches:
+        coaches_by_journey[coach["journey_id"]].append(coach)
+
+    def coach_fill_order_for(jid):
+        journey_coaches = coaches_by_journey[jid]
+        three_a = sorted(
+            (c for c in journey_coaches if c["class_code"] == "3A"),
+            key=lambda c: (0 if c["coach_number"] == "B2" else 1, c["coach_number"]),
+        )
+        ordered = [c["coach_id"] for c in three_a]
+        for cls in ("SL", "2A", "CC", "EC"):
+            ordered.extend(
+                c["coach_id"]
+                for c in sorted(
+                    (c for c in journey_coaches if c["class_code"] == cls),
+                    key=lambda c: c["coach_number"],
+                )
+            )
+        return ordered
+
     for b in active_confirmed_bookings:
         bidx = int(b["booking_id"][2:])
         size = b["number_of_passengers"]
@@ -630,13 +651,13 @@ def main(output_root: str = "."):
             arrangement = "PRIMARY_DEMO"
         else:
             bucket = bidx % 100
-            if bucket < 30:
+            if bucket < 68:
                 arrangement = "GROUP_TOGETHER"
-            elif bucket < 50:
+            elif bucket < 85:
                 arrangement = "SLIGHTLY_SPLIT"
-            elif bucket < 75:
+            elif bucket < 95:
                 arrangement = "MODERATELY_SPLIT"
-            elif bucket < 90:
+            elif bucket < 99:
                 arrangement = "HIGHLY_SPLIT"
             else:
                 arrangement = "NO_POSSIBLE_MATCH"
@@ -651,45 +672,96 @@ def main(output_root: str = "."):
             if any(pid in preassigned for pid in pids):
                 continue
             size = len(pids)
-            pref_classes = preferred_classes(b, size)
-            possible = []
-            for cls in pref_classes:
-                for cid in coaches_by_journey_class[(jid, cls)]:
-                    if len(available_by_coach[cid]) >= size:
-                        possible.append((cls, cid))
+            bidx = int(booking_id[2:])
+            # Scatter a deterministic slice of small bookings into other classes
+            # so journeys keep cross-class (SL/2A/CC) passengers for the
+            # DIFFERENT_CLASS scenario fixtures instead of filling only 3A.
+            force_class = None
+            if bidx % 9 == 0 and size <= 4:
+                for cls in ("SL", "2A", "CC"):
+                    if any(
+                        coach_lookup[cid2]["class_code"] == cls and len(available_by_coach[cid2]) >= size
+                        for cid2 in coach_fill_order_for(jid)
+                    ):
+                        force_class = cls
+                        break
+            possible = [
+                (coach_lookup[cid]["class_code"], cid)
+                for cid in coach_fill_order_for(jid)
+                if (force_class is None or coach_lookup[cid]["class_code"] == force_class)
+                and len(available_by_coach[cid]) >= size
+            ]
             if not possible:
-                for cid, capset in available_by_coach.items():
-                    coach = coach_lookup[cid]
-                    if coach["journey_id"] == jid and len(capset) >= size:
-                        possible.append((coach["class_code"], cid))
+                possible = [
+                    (coach_lookup[cid]["class_code"], cid)
+                    for cid in coach_fill_order_for(jid)
+                    if len(available_by_coach[cid]) >= size
+                ]
             if not possible:
                 raise RuntimeError(f"No coach capacity for {booking_id}")
             cls, cid = possible[0]
             free = sorted(available_by_coach[cid])
+            bay_of = lambda seat: (seat - 1) // 8
+
             if size == 1 or arrangement_by_booking[booking_id] == "GROUP_TOGETHER":
                 chosen = []
+                # Prefer a contiguous run fully inside a single 8-berth bay so
+                # together-groups render completely green on the seat map.
                 for start in free:
                     run = list(range(start, start + size))
-                    if all(x in available_by_coach[cid] for x in run):
+                    if all(x in available_by_coach[cid] for x in run) and bay_of(run[0]) == bay_of(run[-1]):
                         chosen = run
                         break
                 if not chosen:
+                    for start in free:
+                        run = list(range(start, start + size))
+                        if all(x in available_by_coach[cid] for x in run):
+                            chosen = run
+                            break
+                if not chosen:
                     chosen = free[:size]
             elif arrangement_by_booking[booking_id] == "SLIGHTLY_SPLIT":
-                chosen = free[:size]
-                if size >= 2:
-                    candidate = next((x for x in free if x > chosen[-2] + 2), None)
-                    if candidate:
-                        chosen[-1] = candidate
-                        chosen = sorted(set(chosen))
-                        if len(chosen) < size:
-                            chosen = free[:size]
-            elif arrangement_by_booking[booking_id] == "MODERATELY_SPLIT":
+                # Keep the family clustered and move exactly one member a couple
+                # of bays away within the same coach (visible as one red seat).
+                main_size = max(1, size - 1)
+                main_run = None
+                for start in free:
+                    run = list(range(start, start + main_size))
+                    if all(x in available_by_coach[cid] for x in run):
+                        main_run = run
+                        break
                 chosen = []
-                if len(free) >= size:
-                    take = free[::max(1, len(free) // size)][:size]
-                    if len(take) == size:
-                        chosen = take
+                if main_run:
+                    cluster_bay = bay_of(main_run[0])
+                    away = [x for x in free if x not in main_run and bay_of(x) != cluster_bay]
+                    far = [x for x in away if abs(bay_of(x) - cluster_bay) >= 2]
+                    pool = far or away
+                    if pool:
+                        chosen = main_run + [pool[len(pool) // 2]]
+                if len(chosen) != size:
+                    chosen = free[:size]
+            elif arrangement_by_booking[booking_id] == "MODERATELY_SPLIT":
+                # Two clusters in two different bays of the same coach.
+                half = max(1, size // 2)
+                first_run = None
+                for start in free:
+                    run = list(range(start, start + half))
+                    if all(x in available_by_coach[cid] for x in run):
+                        first_run = run
+                        break
+                chosen = []
+                if first_run:
+                    bay_a = bay_of(first_run[0])
+                    rest_free = [x for x in free if x not in first_run and bay_of(x) != bay_a]
+                    remaining = size - len(first_run)
+                    second_run = None
+                    for start in rest_free:
+                        run = list(range(start, start + remaining))
+                        if all(x in available_by_coach[cid] for x in run):
+                            second_run = run
+                            break
+                    if second_run:
+                        chosen = sorted(first_run + second_run)
                 if len(chosen) != size:
                     chosen = free[:size]
             elif arrangement_by_booking[booking_id] == "HIGHLY_SPLIT":
@@ -1027,6 +1099,9 @@ def main(output_root: str = "."):
             pref_by_passenger[pid]["exchange_same_coach_only"] = True
             pref_by_passenger[pid]["exchange_same_class_only"] = True
             pref_by_passenger[pid]["willing_to_exchange"] = True
+            if pid in eligibility_by_passenger:
+                eligibility_by_passenger[pid]["eligible"] = True
+                eligibility_by_passenger[pid]["reason"] = "WILLING_TO_EXCHANGE"
         for jid, cid in [(assignment_by_passenger[pid]["journey_id"], assignment_by_passenger[pid]["coach_id"]) for pid in gpids]:
             for a in assignment_by_coach[(jid, cid)]:
                 if a["passenger_id"] not in gpids:

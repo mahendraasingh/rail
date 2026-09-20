@@ -6,7 +6,7 @@ const { getDBStatus } = require('../config/db');
 const { analyzeGroupSplit, getBerthTypeFromSeat } = require('../utils/seatUtils');
 const { generateCoachSeatMap } = require('../services/seatService');
 const { findMatchesForJourney } = require('../services/matchingService');
-const { loadDataset, getDatasetStatus } = require('../services/datasetService');
+const { loadDataset, getDatasetStatus, isDatasetJourneyId } = require('../services/datasetService');
 
 // In-Memory store fallback
 let inMemoryJourneys = [];
@@ -295,7 +295,13 @@ const getJourneyById = async (req, res) => {
 
     const groupPassengers = passengers.filter((p) => p.groupId);
     const groupSplitInfo = analyzeGroupSplit(groupPassengers);
-    const matchesResult = findMatchesForJourney({ passengers, activeSwaps: swaps });
+    // Matches are coach-specific; use only passengers seated in the journey's coach
+    const matchesResult = findMatchesForJourney({
+      passengers: isDatasetJourneyId(journeyIdStr)
+        ? passengers.filter((p) => (p.coach || '').toString().toUpperCase() === (journey.coach || '').toString().toUpperCase())
+        : passengers,
+      activeSwaps: swaps,
+    });
 
     return res.json({
       journey,
@@ -336,7 +342,14 @@ const getJourneySeatMap = async (req, res) => {
       swaps = inMemorySwaps.filter((s) => s.journeyId && s.journeyId.toString() === journeyIdStr);
     }
 
-    const matchesResult = findMatchesForJourney({ passengers, activeSwaps: swaps });
+    // Matches (and therefore RECOMMENDED seat highlighting) are coach-specific;
+    // use only passengers seated in the journey's coach
+    const matchesResult = findMatchesForJourney({
+      passengers: isDatasetJourneyId(journeyIdStr)
+        ? passengers.filter((p) => (p.coach || '').toString().toUpperCase() === (journey.coach || '').toString().toUpperCase())
+        : passengers,
+      activeSwaps: swaps,
+    });
     const recommendedSeats = matchesResult.recommendations.map((r) => ({
       targetSeatNumber: r.target.seatNumber,
       requesterSeatNumber: r.requester.seatNumber,
@@ -498,5 +511,6 @@ module.exports = {
   seedDatasetJourneys,
   deleteJourney,
   getInMemoryStore,
+  findJourneyById,
 };
 

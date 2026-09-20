@@ -12,7 +12,7 @@ This dataset supports development, testing, UI/API demonstrations, and matching-
 - Synthetic trains: 30
 - Synthetic routes: 30
 - Journey-specific coaches: 1938
-- Journey-specific seat positions: 128604
+- Journey-specific seat positions: 133260
 - Bookings: 12000
 - Passengers: 35100
 - Travelling groups: 12000
