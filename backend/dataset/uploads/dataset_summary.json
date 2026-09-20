@@ -1,0 +1,59 @@
+{
+  "seed": 404404,
+  "reference_date": "2026-09-20",
+  "counts": {
+    "trains": 30,
+    "stations": 70,
+    "routes": 166,
+    "journeys": 180,
+    "coaches": 1938,
+    "seats": 128604,
+    "bookings": 12000,
+    "passengers": 35100,
+    "groups": 12000,
+    "seat_assignments": 32985,
+    "passenger_preferences": 32985,
+    "exchange_eligibility": 32985,
+    "scenario_labels": 103,
+    "data_dictionary": 105
+  },
+  "scenario_types": {
+    "BERTH_COMPATIBILITY": 6,
+    "CANCELLED_BOOKING": 6,
+    "CHILD_WITH_FAMILY": 6,
+    "CONFIRMED_EXCHANGE": 6,
+    "DIFFERENT_CLASS": 6,
+    "EASY_EXCHANGE": 6,
+    "ELDERLY_PASSENGER": 6,
+    "GROUP_SPLIT": 6,
+    "GROUP_TOGETHER": 6,
+    "LARGE_GROUP": 6,
+    "MULTIPLE_GROUPS_IN_SAME_COACH": 6,
+    "MULTIPLE_POSSIBLE_EXCHANGES": 6,
+    "NOT_WILLING_TO_EXCHANGE": 6,
+    "NO_POSSIBLE_MATCH": 6,
+    "PENDING_EXCHANGE": 6,
+    "PRIMARY_DEMO": 1,
+    "SAME_COACH_PREFERENCE": 6,
+    "WAITLIST_RAC": 6
+  },
+  "group_size_distribution": {
+    "1": 3000,
+    "2": 3000,
+    "3": 1800,
+    "4": 2400,
+    "5": 600,
+    "6": 600,
+    "7": 300,
+    "8": 300
+  },
+  "arrangement_distribution": {
+    "GROUP_TOGETHER": 3317,
+    "HIGHLY_SPLIT": 1686,
+    "MODERATELY_SPLIT": 2850,
+    "NO_POSSIBLE_MATCH": 1160,
+    "PRIMARY_DEMO": 1,
+    "SLIGHTLY_SPLIT": 2274
+  },
+  "active_confirmed_passengers": 32985
+}

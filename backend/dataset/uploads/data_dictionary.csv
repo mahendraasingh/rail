@@ -1,0 +1,106 @@
+file_name,column_name,data_type,description,example,required,foreign_key
+trains.csv,train_id,STRING,Stable synthetic train identifier.,TR001,True,PRIMARY KEY
+trains.csv,train_number,STRING,Synthetic train number; not a live schedule identifier.,RT90001,True,
+trains.csv,train_name,STRING,Synthetic Indian railway-style train name.,Northern Harmony Express,True,
+trains.csv,train_type,STRING,Synthetic service category used to choose the coach composition.,SUPERFAST_EXPRESS,True,
+trains.csv,origin_station_code,STRING,Origin station code from stations.csv.,NDLS,True,stations.csv.station_code
+trains.csv,destination_station_code,STRING,Destination station code from stations.csv.,CDG,True,stations.csv.station_code
+trains.csv,total_coaches,INTEGER,Number of coaches on each journey of this train.,11,True,
+trains.csv,active_days,STRING,Comma-separated departure weekdays used by the synthetic journey schedule.,Fri,True,
+trains.csv,operator,STRING,Synthetic operator label.,Indian Railways Demo,True,
+stations.csv,station_id,STRING,Stable synthetic station identifier.,ST0001,True,PRIMARY KEY
+stations.csv,station_code,STRING,Synthetic dataset station code; used consistently across routes/trains/journeys.,NDLS,True,UNIQUE
+stations.csv,station_name,STRING,Railway-style station name.,New Delhi,True,
+stations.csv,city,STRING,City associated with the station.,Delhi,True,
+stations.csv,state,STRING,Indian state or union territory.,Delhi,True,
+stations.csv,zone,STRING,Synthetic railway-zone category for regional variety.,Northern,True,
+routes.csv,route_id,STRING,Stable synthetic route identifier.,RTE001,True,PRIMARY KEY + GROUP
+routes.csv,train_id,STRING,Train using this route.,TR001,True,trains.csv.train_id
+routes.csv,sequence_number,INTEGER,Station order along the route.,1,True,
+routes.csv,station_id,STRING,Station at this route stop.,ST0001,True,stations.csv.station_id
+routes.csv,arrival_time,TIME,Scheduled synthetic arrival time at the stop.,04:50,True,
+routes.csv,departure_time,TIME,Scheduled synthetic departure time at the stop.,05:00,True,
+routes.csv,day_offset,INTEGER,Days after the journey departure date for this stop.,0,True,
+routes.csv,distance_from_origin_km,INTEGER,Synthetic cumulative distance; increases along each route.,0,True,
+journeys.csv,journey_id,STRING,Stable identifier for one scheduled synthetic trip.,J000001,True,PRIMARY KEY
+journeys.csv,train_id,STRING,Train operating this journey.,TR001,True,trains.csv.train_id
+journeys.csv,journey_date,DATE,Synthetic journey departure date.,2026-09-25,True,
+journeys.csv,origin_station_code,STRING,Journey origin; matches the train route origin.,NDLS,True,stations.csv.station_code
+journeys.csv,destination_station_code,STRING,Journey destination; matches the train route destination.,CDG,True,stations.csv.station_code
+journeys.csv,scheduled_departure,DATETIME,Synthetic scheduled departure datetime.,2026-09-25 05:00:00,True,
+journeys.csv,scheduled_arrival,DATETIME,Synthetic scheduled arrival datetime.,2026-09-25 10:09:00,True,
+journeys.csv,journey_status,ENUM,"SCHEDULED, COMPLETED, or CANCELLED; main dataset uses SCHEDULED.",SCHEDULED,True,
+coaches.csv,coach_id,STRING,Journey-specific coach identifier.,CO000001,True,PRIMARY KEY
+coaches.csv,journey_id,STRING,Journey that owns this coach.,J000001,True,journeys.csv.journey_id
+coaches.csv,coach_number,STRING,Coach label such as B2 or C1.,B1,True,
+coaches.csv,coach_type,ENUM,Journey coach type derived from class code.,AC_THREE_TIER,True,
+coaches.csv,class_code,ENUM,"3A, 2A, SL, CC, or EC.",3A,True,
+coaches.csv,seat_capacity,INTEGER,Number of seat/berth positions in the coach.,64,True,
+seats.csv,seat_id,STRING,Stable seat identifier within the journey-specific coach model.,SE0000001,True,PRIMARY KEY
+seats.csv,coach_id,STRING,Coach owning the seat.,CO000001,True,coaches.csv.coach_id
+seats.csv,coach_number,STRING,Denormalized coach number for application convenience.,B1,True,
+seats.csv,seat_number,INTEGER,Unique numeric seat position inside a coach.,1,True,
+seats.csv,berth_type,ENUM,"LOWER, MIDDLE, UPPER, SIDE_LOWER, SIDE_UPPER, CHAIR, or EXECUTIVE.",LOWER,True,
+seats.csv,row_number,INTEGER,Synthetic layout row/bay number for physical-distance modeling.,1,True,
+seats.csv,position,ENUM,"WINDOW, MIDDLE, AISLE, or SIDE.",WINDOW,True,
+seats.csv,is_window,BOOLEAN,Convenience flag derived from position.,True,True,
+seats.csv,is_aisle,BOOLEAN,Convenience flag derived from position.,False,True,
+bookings.csv,booking_id,STRING,Stable synthetic booking identifier.,BK000001,True,PRIMARY KEY
+bookings.csv,journey_id,STRING,Journey associated with the booking.,J000001,True,journeys.csv.journey_id
+bookings.csv,pnr,STRING,Unique synthetic 10-digit PNR-like identifier.,1295525642,True,UNIQUE
+bookings.csv,booking_date,DATE,Synthetic booking creation date; always before the journey date.,2026-09-16,True,
+bookings.csv,booking_status,ENUM,"CONFIRMED, RAC, WAITLISTED, or CANCELLED.",CONFIRMED,True,
+bookings.csv,number_of_passengers,INTEGER,Number of passenger rows that belong to this booking.,4,True,
+bookings.csv,primary_contact_passenger_id,STRING,"First passenger in the booking, used as synthetic primary contact reference.",P000001,True,passengers.csv.passenger_id
+bookings.csv,booking_type,ENUM,"INDIVIDUAL, FAMILY, FRIENDS, GROUP, or CAREGIVER_COMPANION.",FRIENDS,True,
+passengers.csv,passenger_id,STRING,Stable synthetic passenger identifier.,P000001,True,PRIMARY KEY
+passengers.csv,booking_id,STRING,Booking containing the passenger.,BK000001,True,bookings.csv.booking_id
+passengers.csv,journey_id,STRING,Journey associated with the passenger.,J000001,True,journeys.csv.journey_id
+passengers.csv,group_id,STRING,Travelling-group identifier within the booking/journey.,GR000001,True,groups.csv.group_id
+passengers.csv,full_name,STRING,Synthetic Indian-style name; not linked to a real passenger.,Mahendra Demo,True,
+passengers.csv,age,INTEGER,Synthetic age consistent with passenger_type.,42,True,
+passengers.csv,gender,ENUM,Synthetic gender value for demo variety; not an identity assertion.,OTHER,True,
+passengers.csv,passenger_type,ENUM,"ADULT, CHILD, SENIOR, or INFANT.",ADULT,True,
+passengers.csv,contact_reference,STRING,Synthetic non-contact token such as demo_contact_000001.,demo_contact_000001,True,
+passengers.csv,booking_status,ENUM,Denormalized booking status for filtering.,CONFIRMED,True,bookings.csv.booking_status
+groups.csv,group_id,STRING,Stable travelling-group identifier.,GR000001,True,PRIMARY KEY
+groups.csv,booking_id,STRING,Booking that contains the group.,BK000001,True,bookings.csv.booking_id
+groups.csv,journey_id,STRING,Journey associated with the group.,J000001,True,journeys.csv.journey_id
+groups.csv,group_name,STRING,Synthetic display name for the group.,Friends Demo Group 00001,True,
+groups.csv,group_size,INTEGER,Expected number of passenger rows linked to this group.,4,True,
+groups.csv,group_type,ENUM,"FAMILY, FRIENDS, COUPLE, CAREGIVER, or GROUP.",FRIENDS,True,
+groups.csv,travelling_together,BOOLEAN,Whether the passenger group is intended to travel together.,True,True,
+groups.csv,priority_level,ENUM,Synthetic matching priority; HIGH or NORMAL.,NORMAL,True,
+seat_assignments.csv,assignment_id,STRING,Stable assignment record identifier.,AS0000001,True,PRIMARY KEY
+seat_assignments.csv,journey_id,STRING,Journey owning the assignment.,J000001,True,journeys.csv.journey_id
+seat_assignments.csv,booking_id,STRING,Booking of the passenger assigned to the seat.,BK000001,True,bookings.csv.booking_id
+seat_assignments.csv,passenger_id,STRING,Passenger assigned to the seat.,P000001,True,passengers.csv.passenger_id
+seat_assignments.csv,coach_id,STRING,Journey-specific coach containing the seat.,CO000002,True,coaches.csv.coach_id
+seat_assignments.csv,coach_number,STRING,Denormalized coach label.,B2,True,
+seat_assignments.csv,seat_id,STRING,Seat position assigned to the passenger.,SE0000095,True,seats.csv.seat_id
+seat_assignments.csv,seat_number,INTEGER,Denormalized numeric seat number.,31,True,
+seat_assignments.csv,berth_type,STRING,Denormalized berth/seat type.,LOWER,True,seats.csv.berth_type
+seat_assignments.csv,assignment_status,ENUM,ACTIVE in the current synthetic state.,ACTIVE,True,
+seat_assignments.csv,assigned_at,DATETIME,Synthetic timestamp for assignment creation.,2026-09-16 12:00:00,True,
+passenger_preferences.csv,preference_id,STRING,Stable preference record identifier.,PR0000001,True,PRIMARY KEY
+passenger_preferences.csv,passenger_id,STRING,Passenger owning the preference.,P000001,True,passengers.csv.passenger_id
+passenger_preferences.csv,journey_id,STRING,Journey context for the preference.,J000001,True,journeys.csv.journey_id
+passenger_preferences.csv,preferred_berth_type,STRING,Desired berth/seat type used by the matching engine.,LOWER,True,
+passenger_preferences.csv,preferred_coach,STRING,"Optional coach preference, commonly the current coach when same-coach exchange is requested.",B2,False,
+passenger_preferences.csv,willing_to_exchange,BOOLEAN,Explicit consent input; FALSE means the person must not be suggested.,True,True,
+passenger_preferences.csv,exchange_same_coach_only,BOOLEAN,Whether candidate exchanges must stay inside the current coach.,True,True,
+passenger_preferences.csv,exchange_same_class_only,BOOLEAN,Whether candidate exchanges must stay within the same class.,True,True,
+passenger_preferences.csv,special_note,STRING,Non-medical synthetic scenario note where useful.,,False,
+exchange_eligibility.csv,eligibility_id,STRING,Stable eligibility record identifier.,EL0000001,True,PRIMARY KEY
+exchange_eligibility.csv,journey_id,STRING,Journey context for eligibility.,J000001,True,journeys.csv.journey_id
+exchange_eligibility.csv,passenger_id,STRING,Passenger whose target eligibility is represented.,P000001,True,passengers.csv.passenger_id
+exchange_eligibility.csv,eligible,BOOLEAN,Current synthetic application-level eligibility state.,True,True,
+exchange_eligibility.csv,reason,ENUM,"Reason such as WILLING_TO_EXCHANGE, NOT_WILLING_TO_EXCHANGE, ALREADY_IN_PENDING_REQUEST, or ALREADY_CONFIRMED_SWAP.",WILLING_TO_EXCHANGE,True,
+exchange_eligibility.csv,updated_at,DATETIME,Synthetic last-updated timestamp.,2026-09-24 18:00:00,True,
+scenario_labels.csv,scenario_id,STRING,Stable scenario label identifier.,SC0001,True,PRIMARY KEY
+scenario_labels.csv,journey_id,STRING,Journey containing the scenario fixture.,J000001,True,journeys.csv.journey_id
+scenario_labels.csv,booking_id,STRING,Booking under test.,BK000001,True,bookings.csv.booking_id
+scenario_labels.csv,group_id,STRING,Travelling group under test.,GR000001,True,groups.csv.group_id
+scenario_labels.csv,scenario_type,ENUM,Named test scenario category; not a generated matching decision.,PRIMARY_DEMO,True,
+scenario_labels.csv,description,STRING,Synthetic scenario description.,"Primary RailTogether demo: group members are on B2-31, B2-32, B2-57, B2-58; synthetic candidates are on B2-45, B2-46, B2-60.",True,
+scenario_labels.csv,expected_system_behavior,STRING,Test expectation for the RailTogether matching workflow.,"Detect the split group, consider only willing candidates, calculate compatibility, and allow an application-level exchange request without treating it as an official railway reservation change.",True,

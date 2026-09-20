@@ -1,5 +1,11 @@
 # Changelog
 
+## Synthetic Railway Dataset Integration & Generator Suite
+- Added `generate_dataset.py` (deterministic synthetic railway dataset generator) and `validate_dataset.py` (1.36M check validation suite) in `backend/dataset/`.
+- Generated 14 relational CSV files, `dataset_summary.json`, and `README.md` in `backend/dataset/uploads/` (180 journeys, 30 trains, 70 stations, 12,000 bookings, 35,100 passengers, 32,985 active seat assignments, 103 test scenario labels).
+- Enhanced `backend/services/datasetService.js` to parse relational dataset CSVs into normalized journeys, passengers, preferences, and test scenarios.
+- Added `/api/dataset/seed` endpoint in `backend/routes/datasetRoutes.js` and `seedDatasetJourneys` in `backend/controllers/journeyController.js` for seeding synthetic data into MongoDB or the in-memory fallback store.
+
 ## Directory Restructure: `client/` → `frontend/`, `server/` → `backend/`
 - Moved all frontend source files from `client/` to `frontend/` (React, Vite, Tailwind CSS, node_modules, dist).
 - Moved all backend source files from `server/` to `backend/` (Express, controllers, models, routes, services, utils, dataset, middleware, node_modules).

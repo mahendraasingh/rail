@@ -35,17 +35,16 @@
   - Atomic seat number and berth exchange upon acceptance in application state.
   - Multi-perspective tabs (Received / Sent) for demonstration.
 
-- **Synthetic Dataset Handling**:
-  - Dataset status checking (`GET /api/dataset/status`) with graceful message when empty.
-  - Dataset parser (`backend/services/datasetService.js`) supporting future CSV and JSON uploads.
-
-## Partially Implemented
-- **Synthetic Dataset Uploads**: The loader architecture is fully implemented, but `backend/dataset/uploads/` is kept empty (with `.gitkeep`) pending user dataset upload.
+- **Synthetic Dataset Integration**:
+  - Generator script (`backend/dataset/generate_dataset.py`) & Validation suite (`backend/dataset/validate_dataset.py`) integrated.
+  - Complete synthetic railway dataset generated in `backend/dataset/uploads/` (180 journeys, 30 trains, 70 stations, 12,000 bookings, 35,100 passengers, 32,985 active seat assignments, 103 test scenario labels).
+  - Dataset status checking (`GET /api/dataset/status`), dataset parsing (`POST /api/dataset/load`), and dataset seeding (`POST /api/dataset/seed`).
 
 ## Currently Existing Functionality
 - Complete 15-step demo flow runnable via the UI (*Landing -> Try Demo -> Dashboard -> Split Detection -> Recommendations -> Request Swap -> Accept Swap -> Updated Arrangement*).
 - Full CRUD operations on journeys and passengers.
 - Resilient execution with or without a running MongoDB instance.
+- Fully populated synthetic dataset ready to seed via API.
 
 ## Pending / TODO
 - No explicit unresolved `TODO` comments in the codebase.

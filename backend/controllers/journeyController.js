@@ -465,6 +465,97 @@ const deleteJourney = async (req, res) => {
   }
 };
 
+// @desc    Seed synthetic dataset into application state
+// @route   POST /api/dataset/seed
+// @access  Public
+const seedDatasetJourneys = async (req, res) => {
+  try {
+    const datasetResult = await loadDataset();
+    if (!datasetResult.success || !datasetResult.data) {
+      return res.status(400).json(datasetResult);
+    }
+
+    const { journeys, passengers } = datasetResult.data;
+    const userId = req.user ? req.user._id : 'dataset_importer';
+
+    if (getDBStatus()) {
+      try {
+        let seededJourneysCount = 0;
+        let seededPassengersCount = 0;
+
+        for (const j of journeys) {
+          const existing = await Journey.findOne({ pnr: j.pnr });
+          if (!existing) {
+            const jDoc = await Journey.create({
+              pnr: j.pnr,
+              trainNumber: j.trainNumber,
+              trainName: j.trainName,
+              source: j.source,
+              destination: j.destination,
+              journeyDate: j.journeyDate,
+              coach: j.coach,
+              createdBy: userId,
+              status: 'ACTIVE',
+            });
+            seededJourneysCount++;
+
+            const jPassengers = passengers.filter((p) => p.journeyId === j.journey_id || p.journeyId === j._id);
+            for (const p of jPassengers) {
+              await Passenger.create({
+                name: p.name,
+                journeyId: jDoc._id,
+                userId,
+                groupId: p.groupId,
+                coach: p.coach,
+                seatNumber: p.seatNumber,
+                berthType: p.berthType,
+                ageCategory: p.ageCategory,
+                bookingStatus: p.bookingStatus,
+                isAvailableForSwap: p.isAvailableForSwap,
+              });
+              seededPassengersCount++;
+            }
+          }
+        }
+
+        return res.status(201).json({
+          success: true,
+          message: `Successfully seeded ${seededJourneysCount} new dataset journeys and ${seededPassengersCount} passengers into Database!`,
+          summary: datasetResult.data.summary,
+        });
+      } catch (err) {
+        console.warn('DB dataset seed failed, falling back to memory:', err.message);
+      }
+    }
+
+    // In-memory setup
+    let seededJourneysCount = 0;
+    let seededPassengersCount = 0;
+
+    for (const j of journeys) {
+      const exists = inMemoryJourneys.some((item) => item.pnr === j.pnr || item._id === j._id);
+      if (!exists) {
+        inMemoryJourneys.unshift(j);
+        seededJourneysCount++;
+
+        const jPassengers = passengers.filter((p) => p.journeyId === j.journey_id || p.journeyId === j._id);
+        inMemoryPassengers.push(...jPassengers);
+        seededPassengersCount += jPassengers.length;
+      }
+    }
+
+    return res.status(201).json({
+      success: true,
+      message: `Successfully loaded and seeded ${seededJourneysCount} synthetic dataset journeys (${seededPassengersCount} passengers) into Memory Store!`,
+      totalJourneysInMemory: inMemoryJourneys.length,
+      totalPassengersInMemory: inMemoryPassengers.length,
+      summary: datasetResult.data.summary,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
 // In-memory data store getters/setters for use in other controllers
 const getInMemoryStore = () => ({
   journeys: inMemoryJourneys,
@@ -478,6 +569,8 @@ module.exports = {
   getJourneyById,
   getJourneySeatMap,
   seedDemoJourney,
+  seedDatasetJourneys,
   deleteJourney,
   getInMemoryStore,
 };
+

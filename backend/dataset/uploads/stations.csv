@@ -1,0 +1,71 @@
+station_id,station_code,station_name,city,state,zone
+ST0001,NDLS,New Delhi,Delhi,Delhi,Northern
+ST0002,CDG,Chandigarh,Chandigarh,Chandigarh,Northern
+ST0003,UMB,Ambala Cantt,Ambala,Haryana,Northern
+ST0004,LDH,Ludhiana,Ludhiana,Punjab,Northern
+ST0005,ASR,Amritsar,Amritsar,Punjab,Northern
+ST0006,JAT,Jammu Tawi,Jammu,Jammu and Kashmir,Northern
+ST0007,DDN,Dehradun,Dehradun,Uttarakhand,Northern
+ST0008,SRE,Saharanpur,Saharanpur,Uttar Pradesh,Northern
+ST0009,JP,Jaipur,Jaipur,Rajasthan,North Western
+ST0010,AII,Ajmer,Ajmer,Rajasthan,North Western
+ST0011,KOTA,Kota,Kota,Rajasthan,West Central
+ST0012,BKN,Bikaner,Bikaner,Rajasthan,North Western
+ST0013,UDZ,Udaipur,Udaipur,Rajasthan,North Western
+ST0014,LKO,Lucknow,Lucknow,Uttar Pradesh,Northern
+ST0015,CNB,Kanpur Central,Kanpur,Uttar Pradesh,North Central
+ST0016,GKP,Gorakhpur,Gorakhpur,Uttar Pradesh,North Eastern
+ST0017,BSB,Varanasi,Varanasi,Uttar Pradesh,North Eastern
+ST0018,PRYJ,Prayagraj,Prayagraj,Uttar Pradesh,North Central
+ST0019,GZB,Ghaziabad,Ghaziabad,Uttar Pradesh,Northern
+ST0020,AGC,Agra Cantt,Agra,Uttar Pradesh,North Central
+ST0021,GWL,Gwalior,Gwalior,Madhya Pradesh,North Central
+ST0022,BPL,Bhopal,Bhopal,Madhya Pradesh,West Central
+ST0023,INDB,Indore,Indore,Madhya Pradesh,Western
+ST0024,JBP,Jabalpur,Jabalpur,Madhya Pradesh,West Central
+ST0025,NGP,Nagpur,Nagpur,Maharashtra,Central
+ST0026,MMCT,Mumbai Central,Mumbai,Maharashtra,Western
+ST0027,PUNE,Pune,Pune,Maharashtra,Central
+ST0028,NASH,Nashik Road,Nashik,Maharashtra,Central
+ST0029,ST,Surat,Surat,Gujarat,Western
+ST0030,ADI,Ahmedabad,Ahmedabad,Gujarat,Western
+ST0031,RJT,Rajkot,Rajkot,Gujarat,Western
+ST0032,BRC,Vadodara,Vadodara,Gujarat,Western
+ST0033,RTM,Ratlam,Ratlam,Madhya Pradesh,Western
+ST0034,HWH,Howrah,Kolkata,West Bengal,Eastern
+ST0035,SDAH,Sealdah,Kolkata,West Bengal,Eastern
+ST0036,BBS,Bhubaneswar,Bhubaneswar,Odisha,East Coast
+ST0037,PURI,Puri,Puri,Odisha,East Coast
+ST0038,RNC,Ranchi,Ranchi,Jharkhand,South Eastern
+ST0039,PAT,Patna,Patna,Bihar,East Central
+ST0040,GAYA,Gaya,Gaya,Bihar,East Central
+ST0041,DNR,Danapur,Patna,Bihar,East Central
+ST0042,RDP,Raipur,Raipur,Chhattisgarh,South East Central
+ST0043,BSP,Bilaspur,Bilaspur,Chhattisgarh,South East Central
+ST0044,VSKP,Visakhapatnam,Visakhapatnam,Andhra Pradesh,East Coast
+ST0045,VJA,Vijayawada,Vijayawada,Andhra Pradesh,South Central
+ST0046,BZA,Guntur,Guntur,Andhra Pradesh,South Central
+ST0047,SC,Secunderabad,Hyderabad,Telangana,South Central
+ST0048,HYB,Hyderabad Deccan,Hyderabad,Telangana,South Central
+ST0049,KCG,Kacheguda,Hyderabad,Telangana,South Central
+ST0050,MAS,Chennai Central,Chennai,Tamil Nadu,Southern
+ST0051,MS,Chennai Egmore,Chennai,Tamil Nadu,Southern
+ST0052,CBE,Coimbatore,Coimbatore,Tamil Nadu,Southern
+ST0053,MDU,Madurai,Madurai,Tamil Nadu,Southern
+ST0054,CAPE,Kanyakumari,Kanyakumari,Tamil Nadu,Southern
+ST0055,ERS,Ernakulam Junction,Kochi,Kerala,Southern
+ST0056,TVC,Thiruvananthapuram,Thiruvananthapuram,Kerala,Southern
+ST0057,MYS,Mysuru,Mysuru,Karnataka,South Western
+ST0058,SBC,KSR Bengaluru,Bengaluru,Karnataka,South Western
+ST0059,UBL,Hubballi,Hubballi,Karnataka,South Western
+ST0060,VSG,Vasco-da-Gama,Vasco da Gama,Goa,Konkan
+ST0061,MAO,Madgaon,Margao,Goa,Konkan
+ST0062,BMR,Bengaluru Cantt,Bengaluru,Karnataka,South Western
+ST0063,TATAN,Tatanagar,Jamshedpur,Jharkhand,South Eastern
+ST0064,ASN,Asansol,Asansol,West Bengal,Eastern
+ST0065,DURG,Durg,Durg,Chhattisgarh,South East Central
+ST0066,R,Raichur,Raichur,Karnataka,South Central
+ST0067,KJM,Krishnarajapuram,Bengaluru,Karnataka,South Western
+ST0068,BVI,Borivali,Mumbai,Maharashtra,Western
+ST0069,NGT,Nagercoil,Nagercoil,Tamil Nadu,Southern
+ST0070,CCT,Kakinada Town,Kakinada,Andhra Pradesh,South Central

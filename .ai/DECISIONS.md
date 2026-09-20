@@ -1,5 +1,18 @@
 # Technical Decisions
 
+## [Dataset] - Deterministic Synthetic Dataset Generator & Relational CSV Schema
+
+### Decision
+Integrated Python-based deterministic synthetic dataset generator (`generate_dataset.py`) and validator (`validate_dataset.py`) using fixed seed (`404404`). The generated dataset produces 14 normalized CSV files covering trains, stations, routes, scheduled trips, coaches, seat layouts, bookings, passengers, groups, seat assignments, preferences, eligibility, and test scenarios.
+
+### Evidence
+Located in [`backend/dataset/generate_dataset.py`](file:///d:/rail/backend/dataset/generate_dataset.py), [`backend/dataset/validate_dataset.py`](file:///d:/rail/backend/dataset/validate_dataset.py), and outputs in [`backend/dataset/uploads/`](file:///d:/rail/backend/dataset/uploads/).
+
+### Impact
+Enables high-scale testing across 180 journeys and 35,100 passengers while guaranteeing reproducible test fixtures (e.g. Primary Demo Delhi-Chandigarh Shatabdi scenario).
+
+---
+
 ## [Restructure] - Rename `client/` → `frontend/` and `server/` → `backend/`
 
 ### Decision

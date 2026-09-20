@@ -1,0 +1,31 @@
+train_id,train_number,train_name,train_type,origin_station_code,destination_station_code,total_coaches,active_days,operator
+TR001,RT90001,Northern Harmony Express,SUPERFAST_EXPRESS,NDLS,CDG,11,Fri,Indian Railways Demo
+TR002,RT90002,Chandigarh Skylink,INTERCITY,NDLS,ASR,8,"Wed,Sat",Indian Railways Demo
+TR003,RT90003,Himalayan Gateway,SHATABDI,NDLS,BSB,9,"Mon,Thu,Fri",Indian Railways Demo
+TR004,RT90004,Ganga City Runner,SUPERFAST_EXPRESS,NDLS,NGP,11,Sun,Indian Railways Demo
+TR005,RT90005,Malwa Connector,SLEEPER_EXPRESS,NDLS,ADI,13,"Tue,Fri",Indian Railways Demo
+TR006,RT90006,Central Meridian Express,RAJDHANI,NDLS,GAYA,8,"Wed,Thu,Sun",Indian Railways Demo
+TR007,RT90007,Pink City Arrow,SUPERFAST_EXPRESS,JP,MMCT,11,Sat,Indian Railways Demo
+TR008,RT90008,Desert Valley Link,SLEEPER_EXPRESS,BKN,ADI,13,"Mon,Thu",Indian Railways Demo
+TR009,RT90009,Deccan Prairie Express,INTERCITY,DDN,ASR,8,"Tue,Wed,Sat",Indian Railways Demo
+TR010,RT90010,Western Horizon,SUPERFAST_EXPRESS,LKO,JP,11,Fri,Indian Railways Demo
+TR011,RT90011,Mumbai Inland Connector,DURONTO,INDB,MMCT,11,"Wed,Sun",Indian Railways Demo
+TR012,RT90012,Narmada Star,SLEEPER_EXPRESS,BPL,HWH,13,"Mon,Tue,Fri",Indian Railways Demo
+TR013,RT90013,Eastern Junction Express,SUPERFAST_EXPRESS,HWH,PAT,11,Thu,Indian Railways Demo
+TR014,RT90014,Coastal Odisha Link,SUPERFAST_EXPRESS,HWH,VJA,11,"Tue,Sat",Indian Railways Demo
+TR015,RT90015,Ganga Dakshin Express,SLEEPER_EXPRESS,PAT,LKO,13,"Mon,Thu,Sun",Indian Railways Demo
+TR016,RT90016,Gujarat Coastline,SUPERFAST_EXPRESS,MMCT,RJT,11,Wed,Indian Railways Demo
+TR017,RT90017,Pune Ahmedabad Runner,INTERCITY,PUNE,ADI,8,"Mon,Fri",Indian Railways Demo
+TR018,RT90018,Vindhya Intercity,SUPERFAST_EXPRESS,PUNE,BSB,11,"Wed,Sat,Sun",Indian Railways Demo
+TR019,RT90019,Tamil Coast Express,SUPERFAST_EXPRESS,MAS,CAPE,11,Tue,Indian Railways Demo
+TR020,RT90020,Mysuru Coastal Link,INTERCITY,MAS,VSG,8,"Thu,Sun",Indian Railways Demo
+TR021,RT90021,Southern Sapphire,SUPERFAST_EXPRESS,MAS,TVC,11,"Tue,Fri,Sat",Indian Railways Demo
+TR022,RT90022,Bengaluru Konkan Express,DURONTO,SBC,MAO,11,Mon,Indian Railways Demo
+TR023,RT90023,Deccan Delta Runner,INTERCITY,HYB,VSKP,8,"Wed,Sat",Indian Railways Demo
+TR024,RT90024,Godavari Connector,SUPERFAST_EXPRESS,KCG,VSKP,11,"Mon,Thu,Fri",Indian Railways Demo
+TR025,RT90025,Telangana Southlink,NIGHT_EXPRESS,SBC,KCG,15,Sun,Indian Railways Demo
+TR026,RT90026,North Capital Connector,INTERCITY,CDG,AGC,8,"Tue,Fri",Indian Railways Demo
+TR027,RT90027,Punjab Hills Express,SUPERFAST_EXPRESS,ASR,DDN,11,"Wed,Thu,Sun",Indian Railways Demo
+TR028,RT90028,Jharkhand Meridian,SUPERFAST_EXPRESS,HWH,RDP,11,Sat,Indian Railways Demo
+TR029,RT90029,Kashi Ranchi Link,NIGHT_EXPRESS,RNC,PRYJ,15,"Mon,Thu",Indian Railways Demo
+TR030,RT90030,Rajasthan Capital Express,SUPERFAST_EXPRESS,BPL,NDLS,11,"Tue,Wed,Sat",Indian Railways Demo

@@ -1,17 +1,38 @@
 const fs = require('fs');
 const path = require('path');
+const { getDBStatus } = require('../config/db');
 
 const UPLOADS_DIR = path.join(__dirname, '..', 'dataset', 'uploads');
 
 /**
- * Dataset Service for detecting, validating and loading synthetic railway datasets
+ * Simple CSV parser helper
+ */
+const parseCSV = (content) => {
+  const lines = content.split(/\r?\n/).filter((l) => l.trim().length > 0);
+  if (lines.length === 0) return [];
+  const headers = lines[0].split(',').map((h) => h.trim().toLowerCase());
+  const rows = [];
+  for (let i = 1; i < lines.length; i++) {
+    // Handle quotes if any, simple split works for standard CSV
+    const values = lines[i].split(',').map((v) => v.trim().replace(/^"|"$/g, ''));
+    const row = {};
+    headers.forEach((h, idx) => {
+      row[h] = values[idx] !== undefined ? values[idx] : '';
+    });
+    rows.push(row);
+  }
+  return rows;
+};
+
+/**
+ * Get current dataset status
  */
 const getDatasetStatus = () => {
   try {
     if (!fs.existsSync(UPLOADS_DIR)) {
       return {
         available: false,
-        message: 'No dataset uploaded. Please upload a synthetic railway dataset.',
+        message: 'No dataset directory found.',
         files: [],
       };
     }
@@ -21,15 +42,20 @@ const getDatasetStatus = () => {
     if (files.length === 0) {
       return {
         available: false,
-        message: 'No dataset uploaded. Please upload a synthetic railway dataset.',
+        message: 'No dataset uploaded. Please generate or upload a synthetic railway dataset.',
         files: [],
       };
     }
 
+    const csvFiles = files.filter((f) => f.endsWith('.csv'));
+    const jsonFiles = files.filter((f) => f.endsWith('.json'));
+
     return {
       available: true,
-      message: `Found ${files.length} synthetic dataset file(s) in dataset/uploads.`,
+      message: `Found ${files.length} synthetic dataset file(s) (${csvFiles.length} CSVs, ${jsonFiles.length} JSONs) in dataset/uploads.`,
       files,
+      csvCount: csvFiles.length,
+      jsonCount: jsonFiles.length,
     };
   } catch (error) {
     return {
@@ -41,7 +67,7 @@ const getDatasetStatus = () => {
 };
 
 /**
- * Load and parse dataset files from dataset/uploads directory
+ * Load and parse relational synthetic railway dataset from dataset/uploads/
  */
 const loadDataset = async () => {
   const status = getDatasetStatus();
@@ -49,116 +75,196 @@ const loadDataset = async () => {
     return {
       success: false,
       message: status.message,
-      data: { journeys: [], passengers: [] },
+      data: { journeys: [], passengers: [], summary: null },
     };
   }
 
-  const loadedJourneys = [];
-  const loadedPassengers = [];
+  try {
+    // Check if full relational CSV dataset exists
+    const journeysPath = path.join(UPLOADS_DIR, 'journeys.csv');
+    const trainsPath = path.join(UPLOADS_DIR, 'trains.csv');
+    const stationsPath = path.join(UPLOADS_DIR, 'stations.csv');
+    const bookingsPath = path.join(UPLOADS_DIR, 'bookings.csv');
+    const passengersPath = path.join(UPLOADS_DIR, 'passengers.csv');
+    const assignmentsPath = path.join(UPLOADS_DIR, 'seat_assignments.csv');
+    const preferencesPath = path.join(UPLOADS_DIR, 'passenger_preferences.csv');
+    const eligibilityPath = path.join(UPLOADS_DIR, 'exchange_eligibility.csv');
+    const scenariosPath = path.join(UPLOADS_DIR, 'scenario_labels.csv');
 
-  for (const filename of status.files) {
-    const filePath = path.join(UPLOADS_DIR, filename);
-    const ext = path.extname(filename).toLowerCase();
+    let loadedJourneys = [];
+    let loadedPassengers = [];
+    let scenarioLabels = [];
+    let summaryData = null;
 
-    try {
-      const content = fs.readFileSync(filePath, 'utf-8');
+    if (fs.existsSync(journeysPath) && fs.existsSync(passengersPath)) {
+      // Relational CSV dataset loading
+      const trainsRows = fs.existsSync(trainsPath) ? parseCSV(fs.readFileSync(trainsPath, 'utf-8')) : [];
+      const stationsRows = fs.existsSync(stationsPath) ? parseCSV(fs.readFileSync(stationsPath, 'utf-8')) : [];
+      const journeysRows = parseCSV(fs.readFileSync(journeysPath, 'utf-8'));
+      const bookingsRows = fs.existsSync(bookingsPath) ? parseCSV(fs.readFileSync(bookingsPath, 'utf-8')) : [];
+      const passengersRows = parseCSV(fs.readFileSync(passengersPath, 'utf-8'));
+      const assignmentsRows = fs.existsSync(assignmentsPath) ? parseCSV(fs.readFileSync(assignmentsPath, 'utf-8')) : [];
+      const preferencesRows = fs.existsSync(preferencesPath) ? parseCSV(fs.readFileSync(preferencesPath, 'utf-8')) : [];
+      const eligibilityRows = fs.existsSync(eligibilityPath) ? parseCSV(fs.readFileSync(eligibilityPath, 'utf-8')) : [];
 
-      if (ext === '.json') {
-        const parsed = JSON.parse(content);
-        if (Array.isArray(parsed)) {
-          // Could be an array of journeys or passengers
-          parsed.forEach((item) => {
-            if (item.pnr || item.trainNumber) {
-              loadedJourneys.push(normalizeJourney(item));
-            } else if (item.name && item.seatNumber) {
-              loadedPassengers.push(normalizePassenger(item));
-            }
-          });
-        } else if (typeof parsed === 'object') {
-          if (Array.isArray(parsed.journeys)) {
-            parsed.journeys.forEach((j) => loadedJourneys.push(normalizeJourney(j)));
-          }
-          if (Array.isArray(parsed.passengers)) {
-            parsed.passengers.forEach((p) => loadedPassengers.push(normalizePassenger(p)));
-          }
+      if (fs.existsSync(scenariosPath)) {
+        scenarioLabels = parseCSV(fs.readFileSync(scenariosPath, 'utf-8'));
+      }
+
+      const summaryPath = path.join(UPLOADS_DIR, 'dataset_summary.json');
+      if (fs.existsSync(summaryPath)) {
+        try {
+          summaryData = JSON.parse(fs.readFileSync(summaryPath, 'utf-8'));
+        } catch (_) {}
+      }
+
+      // Build indexing maps for fast lookup
+      const trainMap = new Map();
+      trainsRows.forEach((t) => trainMap.set(t.train_id, t));
+
+      const stationMap = new Map();
+      stationsRows.forEach((s) => stationMap.set(s.station_code, s));
+
+      const bookingMap = new Map();
+      bookingsRows.forEach((b) => bookingMap.set(b.booking_id, b));
+
+      const assignmentMap = new Map();
+      assignmentsRows.forEach((a) => {
+        if (a.assignment_status === 'ACTIVE' || !a.assignment_status) {
+          assignmentMap.set(a.passenger_id, a);
         }
-      } else if (ext === '.csv') {
-        const lines = content.split(/\r?\n/).filter((l) => l.trim().length > 0);
-        if (lines.length > 1) {
-          const headers = lines[0].split(',').map((h) => h.trim().toLowerCase());
-          for (let i = 1; i < lines.length; i++) {
-            const values = lines[i].split(',').map((v) => v.trim());
-            const row = {};
-            headers.forEach((h, idx) => {
-              row[h] = values[idx] || '';
-            });
+      });
 
-            if (row.pnr || row.trainnumber || row.train_number) {
-              loadedJourneys.push(normalizeJourneyFromCsv(row));
-            } else if (row.name && (row.seatnumber || row.seat_number)) {
-              loadedPassengers.push(normalizePassengerFromCsv(row));
+      const preferenceMap = new Map();
+      preferencesRows.forEach((p) => preferenceMap.set(p.passenger_id, p));
+
+      const eligibilityMap = new Map();
+      eligibilityRows.forEach((e) => eligibilityMap.set(e.passenger_id, e));
+
+      // Build Journeys
+      journeysRows.forEach((j) => {
+        const train = trainMap.get(j.train_id) || {};
+        const originCode = j.origin_station_code || train.origin_station_code || 'NDLS';
+        const destCode = j.destination_station_code || train.destination_station_code || 'CDG';
+
+        const originStation = stationMap.get(originCode);
+        const destStation = stationMap.get(destCode);
+
+        const sourceName = originStation ? `${originStation.station_name} (${originCode})` : originCode;
+        const destName = destStation ? `${destStation.station_name} (${destCode})` : destCode;
+
+        loadedJourneys.push({
+          _id: j.journey_id,
+          journey_id: j.journey_id,
+          pnr: `84${j.journey_id.replace(/\D/g, '').padStart(8, '0')}`,
+          trainNumber: train.train_number || '12011',
+          trainName: train.train_name || 'Railway Express',
+          source: sourceName,
+          destination: destName,
+          journeyDate: j.journey_date || '2026-09-25',
+          coach: 'B2',
+          status: j.journey_status || 'ACTIVE',
+          createdBy: 'synthetic_dataset_importer',
+        });
+      });
+
+      // Build Passengers
+      passengersRows.forEach((p) => {
+        const assignment = assignmentMap.get(p.passenger_id);
+        const preference = preferenceMap.get(p.passenger_id);
+        const eligibility = eligibilityMap.get(p.passenger_id);
+
+        if (assignment) {
+          const willing = preference
+            ? preference.willing_to_exchange.toLowerCase() === 'true'
+            : eligibility
+            ? eligibility.eligible.toLowerCase() === 'true'
+            : true;
+
+          loadedPassengers.push({
+            _id: p.passenger_id,
+            passenger_id: p.passenger_id,
+            journeyId: p.journey_id,
+            name: p.full_name || p.name,
+            groupId: p.group_id || null,
+            coach: assignment.coach_number || 'B2',
+            seatNumber: parseInt(assignment.seat_number, 10),
+            berthType: assignment.berth_type || 'LOWER',
+            ageCategory: p.passenger_type || (parseInt(p.age, 10) >= 60 ? 'SENIOR' : 'ADULT'),
+            bookingStatus: p.booking_status === 'CONFIRMED' ? 'CNF' : p.booking_status,
+            isAvailableForSwap: willing,
+          });
+        }
+      });
+    } else {
+      // Generic JSON / simple CSV fallback loader
+      for (const filename of status.files) {
+        const filePath = path.join(UPLOADS_DIR, filename);
+        const ext = path.extname(filename).toLowerCase();
+        try {
+          const content = fs.readFileSync(filePath, 'utf-8');
+          if (ext === '.json') {
+            const parsed = JSON.parse(content);
+            if (Array.isArray(parsed)) {
+              parsed.forEach((item) => {
+                if (item.pnr || item.trainNumber) loadedJourneys.push(normalizeJourney(item));
+                else if (item.name && item.seatNumber) loadedPassengers.push(normalizePassenger(item));
+              });
+            } else if (typeof parsed === 'object') {
+              if (Array.isArray(parsed.journeys)) parsed.journeys.forEach((j) => loadedJourneys.push(normalizeJourney(j)));
+              if (Array.isArray(parsed.passengers)) parsed.passengers.forEach((p) => loadedPassengers.push(normalizePassenger(p)));
             }
           }
+        } catch (err) {
+          console.warn(`[DatasetService] Could not parse file ${filename}: ${err.message}`);
         }
       }
-    } catch (err) {
-      console.warn(`[DatasetService] Could not parse file ${filename}: ${err.message}`);
     }
-  }
 
-  return {
-    success: true,
-    message: `Successfully loaded ${loadedJourneys.length} journeys and ${loadedPassengers.length} passengers from dataset.`,
-    data: {
-      journeys: loadedJourneys,
-      passengers: loadedPassengers,
-    },
-  };
+    return {
+      success: true,
+      message: `Successfully loaded ${loadedJourneys.length} journeys, ${loadedPassengers.length} confirmed passengers, and ${scenarioLabels.length} scenarios from synthetic dataset.`,
+      data: {
+        journeys: loadedJourneys,
+        passengers: loadedPassengers,
+        scenarios: scenarioLabels,
+        summary: summaryData,
+      },
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: `Error parsing dataset: ${error.message}`,
+      data: { journeys: [], passengers: [], summary: null },
+    };
+  }
 };
 
-// Normalizers
+// Normalizer fallbacks
 const normalizeJourney = (j) => ({
+  _id: j.journey_id || j._id || 'j_' + Date.now(),
   pnr: j.pnr || 'PNR' + Math.floor(1000000000 + Math.random() * 9000000000),
   trainNumber: j.trainNumber || j.train_number || '12011',
   trainName: j.trainName || j.train_name || 'Shatabdi Express',
   source: j.source || 'New Delhi (NDLS)',
   destination: j.destination || 'Chandigarh (CDG)',
-  journeyDate: j.journeyDate || j.journey_date || '2026-09-21',
+  journeyDate: j.journeyDate || j.journey_date || '2026-09-25',
   coach: (j.coach || 'B2').toUpperCase(),
   status: 'ACTIVE',
+  createdBy: 'synthetic_dataset_importer',
 });
 
 const normalizePassenger = (p) => ({
-  name: p.name,
+  _id: p.passenger_id || p._id || 'p_' + Date.now(),
+  journeyId: p.journeyId || p.journey_id,
+  name: p.name || p.full_name,
   coach: (p.coach || 'B2').toUpperCase(),
   seatNumber: parseInt(p.seatNumber || p.seat_number, 10),
   berthType: p.berthType || p.berth_type || 'LOWER',
   groupId: p.groupId || p.group_id || null,
-  ageCategory: p.ageCategory || p.age_category || 'ADULT',
+  ageCategory: p.ageCategory || p.passenger_type || 'ADULT',
   bookingStatus: p.bookingStatus || p.booking_status || 'CNF',
   isAvailableForSwap: p.isAvailableForSwap !== undefined ? p.isAvailableForSwap : true,
-});
-
-const normalizeJourneyFromCsv = (row) => ({
-  pnr: row.pnr || 'PNR' + Math.floor(1000000000 + Math.random() * 9000000000),
-  trainNumber: row.trainnumber || row.train_number || '12011',
-  trainName: row.trainname || row.train_name || 'Express',
-  source: row.source || 'Station A',
-  destination: row.destination || 'Station B',
-  journeyDate: row.journeydate || row.journey_date || '2026-09-21',
-  coach: (row.coach || 'B2').toUpperCase(),
-  status: 'ACTIVE',
-});
-
-const normalizePassengerFromCsv = (row) => ({
-  name: row.name,
-  coach: (row.coach || 'B2').toUpperCase(),
-  seatNumber: parseInt(row.seatnumber || row.seat_number, 10),
-  berthType: row.berthtype || row.berth_type || 'LOWER',
-  groupId: row.groupid || row.group_id || null,
-  ageCategory: row.agecategory || row.age_category || 'ADULT',
-  bookingStatus: row.bookingstatus || row.booking_status || 'CNF',
-  isAvailableForSwap: true,
 });
 
 module.exports = {

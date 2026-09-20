@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { getDatasetStatus, loadDataset } = require('../services/datasetService');
+const { seedDatasetJourneys } = require('../controllers/journeyController');
 
 // @desc    Get dataset status
 // @route   GET /api/dataset/status
@@ -18,4 +19,10 @@ router.post('/load', async (req, res) => {
   res.json(result);
 });
 
+// @desc    Seed synthetic dataset into active application state
+// @route   POST /api/dataset/seed
+// @access  Public
+router.post('/seed', seedDatasetJourneys);
+
 module.exports = router;
+
