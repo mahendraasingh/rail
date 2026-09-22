@@ -4,7 +4,7 @@
 
 @layer base {
   body {
-    @apply bg-[#f8fafc] text-slate-800 antialiased selection:bg-rail-500 selection:text-white;
+    @apply bg-[#f8fafc] text-slate-800 dark:bg-navy-950 dark:text-slate-200 antialiased selection:bg-rail-500 selection:text-white;
   }
 }
 
@@ -27,11 +27,29 @@
   background: #94a3b8;
 }
 
+/* Dark mode scrollbar */
+.dark ::-webkit-scrollbar-track {
+  background: #0b0f19;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #1f2937;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #374151;
+}
+
 /* Glassmorphic elements */
 .glass-panel {
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.dark .glass-panel {
+  background: rgba(17, 24, 39, 0.85);
+  border: 1px solid rgba(55, 65, 81, 0.6);
 }
 
 .train-coach-gradient {

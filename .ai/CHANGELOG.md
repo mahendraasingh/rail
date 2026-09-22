@@ -1,5 +1,16 @@
 # Changelog
 
+## Dark Mode Toggle (Navbar Top Corner)
+- Added `darkMode: 'class'` to `tailwind.config.js`; new `context/ThemeContext.jsx`
+  (localStorage `railtogether_theme`, system-preference default) + `hooks/useTheme.js`
+  following the existing useAuth pattern.
+- Navbar: Sun/Moon icon toggle in top corner (desktop actions row + mobile menu row);
+  header, brand, nav links, and mobile drawer got `dark:` variants (navy-900 surfaces).
+- App shell (`App.jsx` root div), `index.html` body, and `index.css` (scrollbar,
+  `.glass-panel`) styled for dark. Pre-hydration script in `index.html` applies the
+  persisted theme before first paint (no flash of light mode).
+- Verified: `vite build` passes; compiled CSS contains `:is(.dark *)` selectors.
+
 ## Journey Entry Split — /journeys List Page
 - Split journey access into two separate entries per user request: **My Journeys** (new `/journeys` route, `pages/Journeys.jsx`) shows ALL trains as ticket-style cards with search (train/station/PNR) and View Journey / Find Matches / Seat Map actions; **New Journey** (`/journey/create`) keeps the full train + passengers form.
 - Navbar now has My Journeys (ListChecks icon) + New Journey entries; Dashboard welcome banner got a "Browse All Journeys" button beside "Create New Journey".

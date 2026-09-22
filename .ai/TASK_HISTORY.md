@@ -1,5 +1,12 @@
 # Task History
 
+## 2026-09-23 — Dark Mode Toggle in Navbar
+- **Task**: User asked for an icon-type toggle on the top corner to switch to dark mode.
+- **Outcome**: Theme infrastructure added (class-based dark mode, ThemeContext + useTheme,
+  localStorage + system-preference default, pre-paint script in index.html). Sun/Moon
+  icon toggle placed in the Navbar top corner for both desktop and mobile. Navbar, app
+  shell, body, and scrollbar/glass-panel styles adapted. Build verified.
+
 ## 2026-09-21 — Journey Entry Split
 - User wanted two separate things: (1) a form-only Create Journey flow, (2) a browsable train list. Added `pages/Journeys.jsx` + `/journeys` route, split Navbar links (My Journeys / New Journey), added Dashboard "Browse All Journeys" button. Build verified. Also corrected stale memory: `pages/Recommendations.jsx` still exists and is routed.
 

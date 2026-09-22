@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { useTheme } from '../hooks/useTheme';
 import Button from './Button';
 import {
   Train,
@@ -12,11 +13,14 @@ import {
   Menu,
   X,
   ListChecks,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import clsx from 'clsx';
 
 export const Navbar = () => {
   const { user, isAuthenticated, logout } = useAuth();
+  const { isDark, toggleTheme } = useTheme();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -30,7 +34,7 @@ export const Navbar = () => {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
+    <header className="sticky top-0 z-40 bg-white/90 dark:bg-navy-900/90 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-700/60 shadow-xs transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Brand Logo */}
@@ -40,10 +44,10 @@ export const Navbar = () => {
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="font-extrabold text-lg text-slate-900 tracking-tight">RailTogether</span>
+                <span className="font-extrabold text-lg text-slate-900 dark:text-white tracking-tight">RailTogether</span>
                 <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-rail-100 text-rail-700">MVP</span>
               </div>
-              <p className="text-[11px] text-slate-500 font-medium hidden sm:block">Seat Exchange Coordinator</p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium hidden sm:block">Seat Exchange Coordinator</p>
             </div>
           </Link>
 
@@ -59,8 +63,8 @@ export const Navbar = () => {
                     className={clsx(
                       'flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-colors',
                       isActive(link.path)
-                        ? 'bg-rail-50 text-rail-700 font-semibold'
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
+                        ? 'bg-rail-50 text-rail-700 font-semibold dark:bg-rail-500/15 dark:text-rail-300'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-700/50'
                     )}
                   >
                     <Icon className="w-4 h-4" />
@@ -77,6 +81,15 @@ export const Navbar = () => {
 
           {/* Actions & User Info */}
           <div className="hidden md:flex items-center gap-3">
+            {/* Theme Toggle (top corner) */}
+            <button
+              onClick={toggleTheme}
+              title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+              aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+              className="p-2 rounded-xl text-slate-500 hover:text-rail-600 hover:bg-rail-50 dark:text-slate-400 dark:hover:text-rail-300 dark:hover:bg-slate-700/50 transition-colors"
+            >
+              {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
             {isAuthenticated ? (
               <div className="flex items-center gap-2 border-l border-slate-200 pl-3">
                 <Link
@@ -111,6 +124,14 @@ export const Navbar = () => {
           {/* Mobile Menu Button */}
           <div className="flex items-center gap-2 md:hidden">
             <button
+              onClick={toggleTheme}
+              title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+              aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+              className="p-2 rounded-xl text-slate-500 hover:text-rail-600 hover:bg-rail-50 dark:text-slate-400 dark:hover:text-rail-300 dark:hover:bg-slate-700/50 transition-colors"
+            >
+              {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
+            <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 text-slate-600 hover:text-slate-900 rounded-xl hover:bg-slate-100"
             >
@@ -122,7 +143,7 @@ export const Navbar = () => {
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-white border-b border-slate-200 px-4 pt-2 pb-6 space-y-3 animate-fade-in shadow-lg">
+        <div className="md:hidden bg-white dark:bg-navy-900 border-b border-slate-200 dark:border-slate-700 px-4 pt-2 pb-6 space-y-3 animate-fade-in shadow-lg">
           {isAuthenticated ? (
             <div className="space-y-1">
               <div className="p-2 border-b border-slate-100 mb-2">
@@ -139,8 +160,8 @@ export const Navbar = () => {
                     className={clsx(
                       'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium',
                       isActive(link.path)
-                        ? 'bg-rail-50 text-rail-700 font-bold'
-                        : 'text-slate-700 hover:bg-slate-100'
+                        ? 'bg-rail-50 text-rail-700 font-bold dark:bg-rail-500/15 dark:text-rail-300'
+                        : 'text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700/50'
                     )}
                   >
                     <Icon className="w-5 h-5" />

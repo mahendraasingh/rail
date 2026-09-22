@@ -3,7 +3,17 @@
 ## Overall Status
 **Premium Redesigned Full-Stack App (Active & Running on Localhost)**
 - **Frontend**: `http://localhost:5173/` (Vite) — source in `frontend/`
-- **Backend API**: `http://localhost:5000/` (Express.js, connected to MongoDB) — source in `backend/`
+- **Backend API**: `http://localhost:5000/` (Express.js, connected to inline MongoDB) — source in `backend/`
+
+## Dark Mode (latest addition)
+- `ThemeContext` (`context/ThemeContext.jsx`) + `useTheme` hook; theme persisted in
+  localStorage `railtogether_theme`, defaults to system `prefers-color-scheme`.
+- Toggle icon (Sun/Moon) in Navbar top corner, desktop actions row AND mobile menu row.
+- `darkMode: 'class'` in `tailwind.config.js`; `dark:` variants applied to app shell, Navbar
+  (header/brand/links/drawer), `index.html` body, `index.css` (scrollbar, `.glass-panel`).
+- Pre-hydration script in `index.html` applies persisted theme before first paint (no FOUC).
+- Page content below Navbar is still light-styled; toggling flips the shell/Navbar + adapts
+  via compiled `:is(.dark *)` variants wherever `dark:` classes exist.
 
 ## Design System (Railway Premium — NO blue SaaS)
 - **Palette** (`frontend/tailwind.config.js`): `ivory`/`cream` backgrounds, `ink` (deep graphite) text,
