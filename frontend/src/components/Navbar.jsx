@@ -34,7 +34,7 @@ export const Navbar = () => {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <header className="sticky top-0 z-40 bg-white/90 dark:bg-navy-900/90 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-700/60 shadow-xs transition-colors duration-300">
+    <header className="sticky top-0 z-40 bg-white/90 dark:bg-coal-900/90 backdrop-blur-md border-b border-slate-200/80 dark:border-coal-700/60 shadow-xs transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Brand Logo */}
@@ -143,7 +143,7 @@ export const Navbar = () => {
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-white dark:bg-navy-900 border-b border-slate-200 dark:border-slate-700 px-4 pt-2 pb-6 space-y-3 animate-fade-in shadow-lg">
+        <div className="md:hidden bg-white dark:bg-coal-900 border-b border-slate-200 dark:border-coal-700 px-4 pt-2 pb-6 space-y-3 animate-fade-in shadow-lg">
           {isAuthenticated ? (
             <div className="space-y-1">
               <div className="p-2 border-b border-slate-100 mb-2">

@@ -1,5 +1,12 @@
 # Task History
 
+## 2026-09-23 — Warm Charcoal Dark Palette
+- **Task**: User said dark background looked blue and "AI-generated"; wanted warm black.
+- **Outcome**: Added `coal` warm ramp to tailwind.config.js; rewired app shell, body,
+  navbar, scrollbar, glass-panel, and the entire index.css remap layer from navy/slate/
+  gray values to warm charcoal (R≥B). Accent hues kept; saffron focus ring. E2E-verified
+  all dark surfaces are warm; persistence and un-toggle still pass; build green.
+
 ## 2026-09-23 — Whole-App Dark Mode
 - **Task**: User wanted the ENTIRE app in dark mode while toggled, not just the navbar.
 - **Approach**: Rather than annotating ~44 JSX files with dark: variants, added a CSS

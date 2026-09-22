@@ -11,6 +11,11 @@
 - Toggle icon (Sun/Moon) in Navbar top corner, desktop actions row AND mobile menu row.
 - `darkMode: 'class'` in `tailwind.config.js`; `dark:` variants on app shell, Navbar,
   `index.html` body, `index.css` (scrollbar, `.glass-panel`).
+- **WARM CHARCOAL dark palette** (user rejected blue-tinted navy): new `coal` color ramp in
+  `tailwind.config.js` (brown undertone; 950 `#12100d`, 900 `#181512`, 800 `#211d18`,
+  750 `#2b2620`, 700 `#37302a`, 300 `#a89b8a`, 100 `#e8e2da`). App shell, body, navbar
+  surfaces, scrollbar, glass-panel, and the whole remap layer use coal; accents stay
+  brand-colored; form focus ring is warm saffron.
 - Pre-hydration script in `index.html` applies persisted theme before first paint (no FOUC).
 - **WHOLE-APP dark via CSS remap layer** in `index.css` (`@layer components`, `.dark :is(*)`
   + `&.utility` nesting): re-maps every light utility actually used (bg-white, bg-slate-*,

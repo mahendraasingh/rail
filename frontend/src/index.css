@@ -4,7 +4,7 @@
 
 @layer base {
   body {
-    @apply bg-[#f8fafc] text-slate-800 dark:bg-navy-950 dark:text-slate-200 antialiased selection:bg-rail-500 selection:text-white;
+    @apply bg-[#f8fafc] text-slate-800 dark:bg-coal-950 dark:text-coal-100 antialiased selection:bg-rail-500 selection:text-white;
   }
 }
 
@@ -27,17 +27,17 @@
   background: #94a3b8;
 }
 
-/* Dark mode scrollbar */
+/* Dark mode scrollbar — warm charcoal, no blue cast */
 .dark ::-webkit-scrollbar-track {
-  background: #0b0f19;
+  background: #181512;
 }
 
 .dark ::-webkit-scrollbar-thumb {
-  background: #1f2937;
+  background: #37302a;
 }
 
 .dark ::-webkit-scrollbar-thumb:hover {
-  background: #374151;
+  background: #443c34;
 }
 
 /* Glassmorphic elements */
@@ -48,8 +48,8 @@
 }
 
 .dark .glass-panel {
-  background: rgba(17, 24, 39, 0.85);
-  border: 1px solid rgba(55, 65, 81, 0.6);
+  background: rgba(33, 29, 24, 0.88);
+  border: 1px solid rgba(168, 155, 138, 0.18);
 }
 
 .train-coach-gradient {
@@ -57,20 +57,21 @@
 }
 
 /*
- * Application-wide dark theme remapping.
+ * Application-wide dark theme remapping — WARM CHARCOAL (brown/amber undertone).
  * Instead of annotating every JSX utility with dark: variants, elements that opt
  * into dark mode (any element inside .dark) get their light-surface utilities
- * remapped to dark equivalents here. Intentional dark-on-dark surfaces (ink hero
- * bands, dark buttons, white text/borders on dark backgrounds) are NOT overridden.
+ * remapped to warm dark equivalents here. Intentional dark-on-dark surfaces (ink
+ * hero bands, dark buttons, white text/borders on dark backgrounds) are NOT overridden.
  */
 @layer components {
   .dark :is(*) {
+    /* ---- surfaces ---- */
     &.bg-white,
     &.hover\:bg-white:hover,
     &.bg-white\/85,
     &.bg-white\/90,
     &.bg-white\/80 {
-      background-color: #111827; /* navy-800: card surface */
+      background-color: #211d18; /* coal-800: card surface */
     }
     &.bg-white\/10,
     &.bg-white\/15,
@@ -83,7 +84,7 @@
     &.hover\:bg-slate-50:hover,
     &.bg-slate-50\/50,
     &.bg-slate-50\/70 {
-      background-color: #0b0f19; /* navy-900: page / subtle surface */
+      background-color: #181512; /* coal-900: page / subtle surface */
     }
 
     &.bg-slate-100,
@@ -94,14 +95,15 @@
     &.bg-slate-200,
     &.bg-slate-200\/60,
     &.hover\:bg-slate-200\/60:hover {
-      background-color: #1f2937; /* gray-800: inset well / hover */
+      background-color: #2b2620; /* coal-750: inset well / hover */
     }
 
     &.bg-slate-400 {
-      background-color: #64748b;
+      background-color: #7d6f5f; /* coal-400 */
     }
 
-    &.bg-sky-50 { background-color: rgba(14, 165, 233, 0.15); }
+    /* semantic tints (kept as accents, slightly muted for the warm base) */
+    &.bg-sky-50 { background-color: rgba(14, 165, 233, 0.14); }
     &.bg-sky-100 { background-color: rgba(14, 165, 233, 0.2); }
 
     &.bg-purple-50 { background-color: rgba(168, 85, 247, 0.15); }
@@ -139,23 +141,23 @@
       background-color: transparent;
     }
 
-    /* ---- text: primary & secondary on light surfaces ---- */
+    /* ---- text: primary & secondary on light surfaces (warm off-whites) ---- */
     &.text-slate-900,
     &.hover\:text-slate-900:hover,
     &.text-slate-800,
     &.text-slate-700,
     &.hover\:text-slate-700:hover {
-      color: #e2e8f0; /* slate-200 */
+      color: #e8e2da; /* coal-100: warm paper white */
     }
     &.text-slate-600,
     &.text-slate-500 {
-      color: #94a3b8; /* slate-400 */
+      color: #a89b8a; /* coal-300: warm taupe */
     }
     &.text-slate-400 {
-      color: #64748b; /* slate-500 */
+      color: #7d6f5f; /* coal-400 */
     }
 
-    /* ---- text: accents ---- */
+    /* ---- text: accents (brand/semantic hues preserved for contrast) ---- */
     &.text-rail-600 { color: #7cc7fb; }
     &.text-rail-700,
     &.hover\:text-rail-600:hover,
@@ -178,19 +180,19 @@
     &.text-amber-800,
     &.text-amber-900 { color: #fcd34d; }
 
-    /* ---- borders ---- */
+    /* ---- borders (warm hairlines) ---- */
     &.border-slate-200,
     &.border-slate-200\/80,
     &.border-slate-200\/90,
     &.border-slate-100 {
-      border-color: #1f2937;
+      border-color: #37302a; /* coal-700 */
     }
     &.border-slate-300,
     &.border-slate-300\/80,
     &.hover\:border-slate-300:hover,
     &.border-slate-400,
     &.hover\:border-slate-400:hover {
-      border-color: #374151;
+      border-color: #443c34; /* coal-600 */
     }
     &.border-rail-200 { border-color: rgba(14, 140, 228, 0.35); }
     &.border-rail-500 { border-color: rgba(14, 140, 228, 0.55); }
@@ -209,20 +211,20 @@
     &.border-amber-400 { border-color: rgba(245, 158, 11, 0.5); }
     &.border-amber-500,
     &.hover\:border-amber-500:hover { border-color: #f59e0b; }
-    &.hover\:border-steel-400:hover { border-color: #475569; }
+    &.hover\:border-steel-400:hover { border-color: #5c5147; }
 
     /* ---- form controls (inputs, selects, textareas) ---- */
     &:is(input, select, textarea) {
-      background-color: #111827;
-      border-color: #374151;
-      color: #e2e8f0;
+      background-color: #211d18; /* coal-800 */
+      border-color: #443c34; /* coal-600 */
+      color: #e8e2da; /* coal-100 */
     }
     &:is(input, select, textarea)::placeholder {
-      color: #64748b;
+      color: #7d6f5f; /* coal-400 */
       opacity: 1;
     }
     &:is(input, select, textarea):focus {
-      border-color: rgba(14, 140, 228, 0.65);
+      border-color: rgba(245, 158, 11, 0.55); /* warm saffron focus */
       outline: none;
     }
     &.ring-rail-500 {

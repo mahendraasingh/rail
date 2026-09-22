@@ -1,5 +1,14 @@
 # Changelog
 
+## Warm Charcoal Dark Palette (replaces blue-tinted navy)
+- User feedback: dark mode looked blue/generic-AI. Added `coal` warm-charcoal ramp
+  (brown undertone) to `tailwind.config.js` and rewired all dark surfaces: app shell,
+  index.html body, navbar (header + drawer), scrollbar, glass-panel, and every value
+  in the `.dark` remap layer (cards → coal-800, page → coal-950, wells → coal-750,
+  text → warm off-whites coal-100/300/400, borders → coal-700/600, inputs → coal-800
+  with saffron focus). Verified via headless E2E: every dark background now has
+  red ≥ blue (genuinely warm), persistence + un-toggle intact, vite build passes.
+
 ## Whole-App Dark Mode (CSS Remap Layer)
 - Dark toggle now restyles the ENTIRE app, not just the navbar. Implemented as a
   `.dark :is(*)` remap layer in `index.css` (`@layer components`, nested `&.utility`

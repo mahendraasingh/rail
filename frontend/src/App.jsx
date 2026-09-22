@@ -21,7 +21,7 @@ export function App() {
     <ThemeProvider>
       <AuthProvider>
         <Router>
-          <div className="min-h-screen flex flex-col bg-[#f8fafc] text-slate-800 dark:bg-navy-950 dark:text-slate-200 transition-colors duration-300">
+          <div className="min-h-screen flex flex-col bg-[#f8fafc] text-slate-800 dark:bg-coal-950 dark:text-coal-100 transition-colors duration-300">
             <Navbar />
             <main className="flex-1">
               <Routes>

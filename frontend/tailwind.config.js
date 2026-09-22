@@ -26,6 +26,21 @@ export default {
           900: '#0b0f19',
           950: '#060911',
         },
+        /* Warm charcoal ramp (brown undertone) for the dark theme — no blue cast */
+        coal: {
+          50: '#f5f2ee',
+          100: '#e8e2da',
+          200: '#cfc5b8',
+          300: '#a89b8a',
+          400: '#7d6f5f',
+          500: '#5c5147',
+          600: '#443c34',
+          700: '#37302a',
+          750: '#2b2620',
+          800: '#211d18',
+          900: '#181512',
+          950: '#12100d',
+        },
         berth: {
           lower: '#0284c7',
           middle: '#6366f1',
