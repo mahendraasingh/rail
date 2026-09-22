@@ -9,11 +9,23 @@
 - `ThemeContext` (`context/ThemeContext.jsx`) + `useTheme` hook; theme persisted in
   localStorage `railtogether_theme`, defaults to system `prefers-color-scheme`.
 - Toggle icon (Sun/Moon) in Navbar top corner, desktop actions row AND mobile menu row.
-- `darkMode: 'class'` in `tailwind.config.js`; `dark:` variants applied to app shell, Navbar
-  (header/brand/links/drawer), `index.html` body, `index.css` (scrollbar, `.glass-panel`).
+- `darkMode: 'class'` in `tailwind.config.js`; `dark:` variants on app shell, Navbar,
+  `index.html` body, `index.css` (scrollbar, `.glass-panel`).
 - Pre-hydration script in `index.html` applies persisted theme before first paint (no FOUC).
-- Page content below Navbar is still light-styled; toggling flips the shell/Navbar + adapts
-  via compiled `:is(.dark *)` variants wherever `dark:` classes exist.
+- **WHOLE-APP dark via CSS remap layer** in `index.css` (`@layer components`, `.dark :is(*)`
+  + `&.utility` nesting): re-maps every light utility actually used (bg-white, bg-slate-*,
+  text-slate-*, colored 50/100/200 tints, borders, form controls, placeholders, hovers)
+  to dark equivalents. Avoid annotating every JSX file with dark: variants.
+- EXCLUDED from remap (intentional dark-on-dark): text-slate-200/300/950, bg-slate-700+,
+  gradient from/to/via stops, border-white (used on ink hero band), bg-slate-400 Badge dot.
+- KNOWN PRE-EXISTING ISSUE (not dark-mode related): many components use `crimson-*`,
+  `saffron-*`, `steel-*`, `ivory`, `ink`, `line`, `paper` classes that are NOT defined in
+  `tailwind.config.js` (only rail/navy/berth are) — verified they generate no CSS. UI was
+  built against the RailSaathi design-system tokens, but the config only ships the older
+  rail/navy palette; those classes silently do nothing in light mode too.
+- VERIFIED via headless Edge CDP click test: html.dark flips, body/header/card/input
+  colors change, persists across reload, un-toggle restores exact light values.
+  NOTE: restart Vite dev server after changing tailwind config (dark: compiled per start).
 
 ## Design System (Railway Premium — NO blue SaaS)
 - **Palette** (`frontend/tailwind.config.js`): `ivory`/`cream` backgrounds, `ink` (deep graphite) text,

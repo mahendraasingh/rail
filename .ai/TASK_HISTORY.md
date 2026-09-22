@@ -1,5 +1,24 @@
 # Task History
 
+## 2026-09-23 — Whole-App Dark Mode
+- **Task**: User wanted the ENTIRE app in dark mode while toggled, not just the navbar.
+- **Approach**: Rather than annotating ~44 JSX files with dark: variants, added a CSS
+  remap layer in `index.css`: `.dark :is(*) { &.bg-white {...} &.text-slate-500 {...} ... }`
+  covering every light utility found via grep inventory (bgs, texts, borders, hovers,
+  form controls, placeholders). Dark-on-dark surfaces (ink band, dark buttons) excluded.
+- **Verified**: headless Edge CDP E2E click test — cards, inputs, navbar, body all flip;
+  persistence across reload; un-toggle restores light. vite build passes.
+
+## 2026-09-23 — Dark Mode "Not Working" Diagnosis
+- **Task**: User reported the dark/light toggle not responding to clicks.
+- **Root cause**: Both dev servers were down (5173 + 5000 refused connections) — user was
+  clicking in a stale tab from a finished Vite session; code itself was correct.
+- **Verification**: Headless-browser (Edge CDP) click test confirmed: click flips `html.dark`,
+  localStorage `railtogether_theme` light→dark, body bg `rgb(248,250,252)`→`rgb(6,9,17)`,
+  header bg → navy-900/90. Note: Tailwind compiles `dark:` variants per server start —
+  changing `darkMode` config requires a dev-server restart.
+- **Outcome**: No code changes; servers restarted and healthy. Diagnostic script deleted.
+
 ## 2026-09-23 — Dark Mode Toggle in Navbar
 - **Task**: User asked for an icon-type toggle on the top corner to switch to dark mode.
 - **Outcome**: Theme infrastructure added (class-based dark mode, ThemeContext + useTheme,

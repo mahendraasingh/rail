@@ -1,5 +1,19 @@
 # Changelog
 
+## Whole-App Dark Mode (CSS Remap Layer)
+- Dark toggle now restyles the ENTIRE app, not just the navbar. Implemented as a
+  `.dark :is(*)` remap layer in `index.css` (`@layer components`, nested `&.utility`
+  selectors) re-mapping all light utilities in use: bg-white/slate/rail/emerald/rose/
+  amber/sky/purple tints, text-slate-400..900, colored borders, hover variants, and
+  form controls (input/select/textarea backgrounds, borders, placeholders, focus ring).
+- Intentional dark-on-dark elements excluded (text-slate-200/300/950, bg-slate-700+,
+  gradient stops, border-white on ink band) so dark hero bands/buttons stay correct.
+- Verified via headless Edge CDP E2E: landing card flips white→navy-800, login inputs
+  flip, persistence across full reload works, un-toggle restores exact light values;
+  `vite build` passes.
+- Also documented pre-existing broken palette classes (crimson/saffron/steel/ivory/ink/
+  line/paper undefined in tailwind.config.js — generate no CSS in light mode too).
+
 ## Dark Mode Toggle (Navbar Top Corner)
 - Added `darkMode: 'class'` to `tailwind.config.js`; new `context/ThemeContext.jsx`
   (localStorage `railtogether_theme`, system-preference default) + `hooks/useTheme.js`

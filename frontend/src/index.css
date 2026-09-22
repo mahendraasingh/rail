@@ -55,3 +55,178 @@
 .train-coach-gradient {
   background: linear-gradient(135deg, #074b82 0%, #03589e 50%, #026fc3 100%);
 }
+
+/*
+ * Application-wide dark theme remapping.
+ * Instead of annotating every JSX utility with dark: variants, elements that opt
+ * into dark mode (any element inside .dark) get their light-surface utilities
+ * remapped to dark equivalents here. Intentional dark-on-dark surfaces (ink hero
+ * bands, dark buttons, white text/borders on dark backgrounds) are NOT overridden.
+ */
+@layer components {
+  .dark :is(*) {
+    &.bg-white,
+    &.hover\:bg-white:hover,
+    &.bg-white\/85,
+    &.bg-white\/90,
+    &.bg-white\/80 {
+      background-color: #111827; /* navy-800: card surface */
+    }
+    &.bg-white\/10,
+    &.bg-white\/15,
+    &.bg-white\/20 {
+      background-color: rgba(255, 255, 255, 0.08); /* translucent chips on colored/gradient bgs */
+    }
+
+    &.bg-\[\#f8fafc\],
+    &.bg-slate-50,
+    &.hover\:bg-slate-50:hover,
+    &.bg-slate-50\/50,
+    &.bg-slate-50\/70 {
+      background-color: #0b0f19; /* navy-900: page / subtle surface */
+    }
+
+    &.bg-slate-100,
+    &.hover\:bg-slate-100:hover,
+    &.hover\:bg-slate-100\/80:hover,
+    &.bg-slate-100\/80,
+    &.bg-slate-100\/90,
+    &.bg-slate-200,
+    &.bg-slate-200\/60,
+    &.hover\:bg-slate-200\/60:hover {
+      background-color: #1f2937; /* gray-800: inset well / hover */
+    }
+
+    &.bg-slate-400 {
+      background-color: #64748b;
+    }
+
+    &.bg-sky-50 { background-color: rgba(14, 165, 233, 0.15); }
+    &.bg-sky-100 { background-color: rgba(14, 165, 233, 0.2); }
+
+    &.bg-purple-50 { background-color: rgba(168, 85, 247, 0.15); }
+
+    &.bg-rail-50,
+    &.hover\:bg-rail-50:hover {
+      background-color: rgba(14, 140, 228, 0.14);
+    }
+    &.bg-rail-100,
+    &.hover\:bg-rail-100:hover {
+      background-color: rgba(14, 140, 228, 0.2);
+    }
+
+    &.bg-emerald-50 { background-color: rgba(16, 185, 129, 0.12); }
+    &.bg-emerald-100,
+    &.hover\:bg-emerald-100:hover,
+    &.hover\:bg-emerald-100\/70:hover { background-color: rgba(16, 185, 129, 0.18); }
+
+    &.bg-rose-50,
+    &.hover\:bg-rose-50:hover { background-color: rgba(244, 63, 94, 0.13); }
+    &.bg-rose-100,
+    &.hover\:bg-rose-100:hover { background-color: rgba(244, 63, 94, 0.2); }
+
+    &.bg-amber-50 { background-color: rgba(245, 158, 11, 0.12); }
+    &.bg-amber-50\/50 { background-color: rgba(245, 158, 11, 0.08); }
+    &.bg-amber-100,
+    &.hover\:bg-amber-100:hover { background-color: rgba(245, 158, 11, 0.18); }
+
+    &.hover\:bg-rose-700:hover,
+    &.hover\:bg-emerald-700:hover,
+    &.hover\:bg-rail-700:hover,
+    &.hover\:bg-amber-500:hover,
+    &.hover\:bg-amber-600:hover {
+      filter: brightness(1.12);
+      background-color: transparent;
+    }
+
+    /* ---- text: primary & secondary on light surfaces ---- */
+    &.text-slate-900,
+    &.hover\:text-slate-900:hover,
+    &.text-slate-800,
+    &.text-slate-700,
+    &.hover\:text-slate-700:hover {
+      color: #e2e8f0; /* slate-200 */
+    }
+    &.text-slate-600,
+    &.text-slate-500 {
+      color: #94a3b8; /* slate-400 */
+    }
+    &.text-slate-400 {
+      color: #64748b; /* slate-500 */
+    }
+
+    /* ---- text: accents ---- */
+    &.text-rail-600 { color: #7cc7fb; }
+    &.text-rail-700,
+    &.hover\:text-rail-600:hover,
+    &.hover\:text-rail-700:hover { color: #7cc7fb; }
+    &.text-rail-800 { color: #bae0fd; }
+    &.text-sky-700 { color: #38bdf8; }
+    &.text-purple-600,
+    &.text-purple-700 { color: #c084fc; }
+    &.text-emerald-600 { color: #34d399; }
+    &.text-emerald-700,
+    &.text-emerald-800,
+    &.text-emerald-900 { color: #6ee7b7; }
+    &.text-rose-600,
+    &.hover\:text-rose-600:hover,
+    &.hover\:text-rose-700:hover { color: #fb7185; }
+    &.text-rose-700,
+    &.text-rose-800 { color: #fda4af; }
+    &.text-amber-600 { color: #fbbf24; }
+    &.text-amber-700,
+    &.text-amber-800,
+    &.text-amber-900 { color: #fcd34d; }
+
+    /* ---- borders ---- */
+    &.border-slate-200,
+    &.border-slate-200\/80,
+    &.border-slate-200\/90,
+    &.border-slate-100 {
+      border-color: #1f2937;
+    }
+    &.border-slate-300,
+    &.border-slate-300\/80,
+    &.hover\:border-slate-300:hover,
+    &.border-slate-400,
+    &.hover\:border-slate-400:hover {
+      border-color: #374151;
+    }
+    &.border-rail-200 { border-color: rgba(14, 140, 228, 0.35); }
+    &.border-rail-500 { border-color: rgba(14, 140, 228, 0.55); }
+    &.border-sky-200 { border-color: rgba(14, 165, 233, 0.35); }
+    &.border-purple-200 { border-color: rgba(168, 85, 247, 0.35); }
+    &.border-emerald-200 { border-color: rgba(16, 185, 129, 0.3); }
+    &.border-emerald-300 { border-color: rgba(16, 185, 129, 0.4); }
+    &.border-emerald-500,
+    &.hover\:border-emerald-500:hover { border-color: #10b981; }
+    &.border-rose-200 { border-color: rgba(244, 63, 94, 0.3); }
+    &.border-rose-300 { border-color: rgba(244, 63, 94, 0.4); }
+    &.border-rose-600,
+    &.hover\:border-rose-600:hover { border-color: #f43f5e; }
+    &.border-amber-200 { border-color: rgba(245, 158, 11, 0.3); }
+    &.border-amber-300 { border-color: rgba(245, 158, 11, 0.4); }
+    &.border-amber-400 { border-color: rgba(245, 158, 11, 0.5); }
+    &.border-amber-500,
+    &.hover\:border-amber-500:hover { border-color: #f59e0b; }
+    &.hover\:border-steel-400:hover { border-color: #475569; }
+
+    /* ---- form controls (inputs, selects, textareas) ---- */
+    &:is(input, select, textarea) {
+      background-color: #111827;
+      border-color: #374151;
+      color: #e2e8f0;
+    }
+    &:is(input, select, textarea)::placeholder {
+      color: #64748b;
+      opacity: 1;
+    }
+    &:is(input, select, textarea):focus {
+      border-color: rgba(14, 140, 228, 0.65);
+      outline: none;
+    }
+    &.ring-rail-500 {
+      --tw-ring-color: rgba(14, 140, 228, 0.4);
+    }
+  }
+}
