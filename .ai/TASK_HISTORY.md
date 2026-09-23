@@ -1,5 +1,14 @@
 # Task History
 
+## 2026-09-23 — Remove Landing Train Backdrop
+- **Task**: User asked to remove ONLY the train feature added in the last update —
+  no other frontend feature, no backend change.
+- **Outcome**: Verified via git diff that the last uncommitted change was exactly the
+  train backdrop (TrainBackdrop in Landing.jsx + .train-backdrop* CSS in index.css
+  + .ai entries). Reverted those 5 files to HEAD (dark-mode state). Landing hero is
+  back to the single rail-400/10 glow blob. Verified: no train-backdrop references
+  remain, vite build passes, frontend 200, backend healthy.
+
 ## 2026-09-23 — Warm Charcoal Dark Palette
 - **Task**: User said dark background looked blue and "AI-generated"; wanted warm black.
 - **Outcome**: Added `coal` warm ramp to tailwind.config.js; rewired app shell, body,

@@ -1,5 +1,11 @@
 # Changelog
 
+## Removed: Landing Train Backdrop (revert)
+- Removed the train-themed landing background per user request: `TrainBackdrop`
+  component deleted from `pages/Landing.jsx` and all `.train-backdrop*` CSS/keyframes
+  removed from `index.css`. No other feature, page, or backend code touched.
+- Verified: vite build passes; frontend 200; backend healthy.
+
 ## Warm Charcoal Dark Palette (replaces blue-tinted navy)
 - User feedback: dark mode looked blue/generic-AI. Added `coal` warm-charcoal ramp
   (brown undertone) to `tailwind.config.js` and rewired all dark surfaces: app shell,

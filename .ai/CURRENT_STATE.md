@@ -2,6 +2,9 @@
 
 ## Overall Status
 **Premium Redesigned Full-Stack App (Active & Running on Localhost)**
+
+NOTE: The temporary "Landing Train Backdrop" (TrainBackdrop + .train-backdrop* CSS)
+was REMOVED at user request — reverted to the dark-mode-only state; do not re-add.
 - **Frontend**: `http://localhost:5173/` (Vite) — source in `frontend/`
 - **Backend API**: `http://localhost:5000/` (Express.js, connected to inline MongoDB) — source in `backend/`
 
